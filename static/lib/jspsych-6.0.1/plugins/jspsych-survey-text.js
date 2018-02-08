@@ -12,7 +12,6 @@
 jsPsych.plugins['survey-text'] = (function() {
 
   var plugin = {};
-  throw new Error('survey error')
 
   plugin.info = {
     name: 'survey-text',

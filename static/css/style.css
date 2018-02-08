@@ -13,13 +13,25 @@
 
 .center {
   text-align: center;
-  /*margin-top: 200px;*/
-  margin-bottom: auto;
 }
-
+.left {
+  display: block;
+  float: left;
+}
+.right {
+  display: block;
+  float: right;
+}
+.lower {
+  clear: both;
+  padding-top: 20px;
+}
+.message {
+  /*font-size: 16pt;*/
+}
 img.centered {
   display: block;
-  margin-left: auto;
+  margin-left: auto; 
   margin-right: auto
 }
 img.display {
@@ -31,11 +43,11 @@ img.display {
 }
 
 .body-text {
-  max-width: 700px;
+  max-width: 800px;
 }
 
 .alert {
-  max-width: 700px;
+  max-width: 800px;
   margin: auto;
   margin-top: 50px;
 }
@@ -103,7 +115,7 @@ body {
     background-color: white;
     color: black;
     font-weight: 300;
-    font-size: 13pt;
+    font-size: 14pt;
 }
 
 h1 {

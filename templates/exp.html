@@ -24,13 +24,13 @@
 
         <!-- jsPsych -->
         <script src="static/lib/jspsych-6.0.1/jspsych.js" type="text/javascript"></script>
-        <script src="static/lib/jspsych-6.0.1/plugins/jspsych-survey-text.js" type="text/javascript"></script>
-        <script src="static/lib/jspsych-6.0.1/plugins/jspsych-html.js" type="text/javascript"></script>
         <script src="static/lib/jspsych-6.0.1/plugins/jspsych-instructions.js" type="text/javascript"></script>
+        <script src="static/lib/jspsych-6.0.1/plugins/jspsych-survey-text.js" type="text/javascript"></script>
         <script src="static/lib/jspsych-6.0.1/plugins/jspsych-survey-multi-choice.js" type="text/javascript"></script>
-        <script src="static/lib/jspsych-6.0.1/plugins/jspsych-button-response.js" type="text/javascript"></script>
-        <script src="static/lib/jspsych-6.0.1/plugins/jspsych-call-function.js" type="text/javascript"></script>
-        <script src="static/lib/jspsych-6.0.1/plugins/jspsych-form.js" type="text/javascript"></script>
+        <script src="static/lib/jspsych-6.0.1/plugins/jspsych-image-keyboard-response.js" type="text/javascript"></script>
+        <script src="static/lib/jspsych-6.0.1/plugins/jspsych-html-keyboard-response.js" type="text/javascript"></script>
+        <!-- <script src="static/lib/jspsych-6.0.1/plugins/jspsych-html-button-response.js" type="text/javascript"></script> -->
+        <!-- <script src="static/lib/jspsych-6.0.1/plugins/jspsych-form.js" type="text/javascript"></script> -->
         
         <!-- psiTurk -->
         <script type="text/javascript">
@@ -59,39 +59,38 @@
             <a href="http://support.google.com/bin/answer.py?hl=en&answer=23852">here</a><p>
         </noscript>
 
-        <!-- Main div -->
-        <div id='timer'></div>
-        <div id='jspsych-target' class='jspsych-display-element'>
+        <div id='jspsych-target' class='jspsych-display-element'></div>
+
+        <div id='welcome'>
             <div id='welcome-message' class='jspsych-content'>
                 <h1>Welcome</h1>
                 <p>Thanks for accepting our HIT!
                 <p>Please wait while we load the experiment.
-
             </div>
             
             <div style="display:none;" class="alert alert-danger" id="data-error">
-                  <strong>Error!</strong>
-                  We couldn't contact the database. Try reloading the page. If the
-                  problem persists, please return the HIT and report the error to
-                  cocosci.turk@gmail.com.
+                <strong>Error!</strong>
+                We couldn't contact the database. Try reloading the page. If the
+                problem persists, please return the HIT and report the error to
+                cocosci.turk@gmail.com.
             </div>
 
             <div id="load-icon"></div>
-
-            <div style="display:none;" id="success-load" class="animate-bottom">
-                <br><br><br><br><br>
-                <button id='load-btn' class="btn btn-primary btn-lg">Begin</button>
-            </div>
-
-            <div style="display:none;" class="alert alert-warning" id="slow-load">
-                <strong>Uhh....</strong>
-                The page is taking longer than usual to load. First try refreshing the page. 
-                If it still doesn't work, there may be a problem with our server, or
-                you may not have a fast enough internet connection to participate
-                in this experiment. In either case, please return the HIT so that
-                someone else can participate. We appreciate it!
-            </div>
         </div>
+
+        <!-- <div style="display:none;" id="success-load" class="animate-bottom">
+            <br><br><br><br><br>
+            <button id='load-btn' class="btn btn-primary btn-lg">Begin</button>
+        </div> -->
+
+<!--         <div style="display:none;" class="alert alert-warning" id="slow-load">
+            <strong>Uhh....</strong>
+            The page is taking longer than usual to load. First try refreshing the page. 
+            If it still doesn't work, there may be a problem with our server, or
+            you may not have a fast enough internet connection to participate
+            in this experiment. In either case, please return the HIT so that
+            someone else can participate. We appreciate it!
+        </div> -->
     </body>
 
     <!-- Utilities and boilerplate -->

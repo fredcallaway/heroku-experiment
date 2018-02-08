@@ -1839,13 +1839,13 @@ jsPsych.pluginAPI = (function() {
   module.reset = function(root_element){
     keyboard_listeners = [];
     held_keys = {};
-    root_element.removeEventListener('keydown', root_keydown_listener);
-    root_element.removeEventListener('keyup', root_keyup_listener);
+    window.removeEventListener('keydown', root_keydown_listener);
+    window.removeEventListener('keyup', root_keyup_listener);
   }
 
   module.createKeyboardEventListeners = function(root_element){
-    root_element.addEventListener('keydown', root_keydown_listener);
-    root_element.addEventListener('keyup', root_keyup_listener);
+    window.addEventListener('keydown', root_keydown_listener);
+    window.addEventListener('keyup', root_keyup_listener);
   }
 
   module.getKeyboardResponse = function(parameters) {

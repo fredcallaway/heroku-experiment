@@ -4,7 +4,9 @@ var assert, check, checkObj, converter, delay, mapObject, markdown, mean, sleep,
 converter = new showdown.Converter();
 
 markdown = function(txt) {
-  return converter.makeHtml(txt);
+  // Remove leading spaces so as not to interpret indented
+  // blocks as code blocks. Use fenced code blocks instead.
+  return converter.makeHtml(txt.replace(/^[ ]+/gm, ''));
 };
 
 delay = function(time, func) {

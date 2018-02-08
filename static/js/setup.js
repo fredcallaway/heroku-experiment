@@ -2,13 +2,11 @@
 // coffeelint: disable=max_line_length, indentation
 
 // ---------- Experiment modes ---------- #
-var CONDITION, DEBUG, ERROR, LOCAL, LOG_DEBUG, handleError, psiturk, saveData, startExperiment, submitHit;
+var CONDITION, DEBUG, LOCAL, LOG_DEBUG, handleError, psiturk, saveData, startExperiment, submitHit;
 
 DEBUG = false;
 
 LOCAL = false;
-
-ERROR = void 0;
 
 if (mode === "{{ mode }}") {
   LOCAL = true;
@@ -64,6 +62,7 @@ saveData = function() {
 $(window).on('load', function() {
   return saveData().then(function() {
     return delay(500, function() {
+      $('#welcome').hide();
       return initializeExperiment().catch(handleError);
     });
   }).catch(function() {
