@@ -23,22 +23,62 @@ myauth = PsiTurkAuthorization(config)  # if you want to add a password protect r
 custom_code = Blueprint('custom_code', __name__, template_folder='templates', static_folder='static')
 
 
+def get_participants(codeversion):
+    return (
+        Participant
+        .query
+        .filter(Participant.codeversion == codeversion)
+        # .filter(Participant.status >= 3)  # only take completed
+        .all()
+    )
 
-###########################################################
-#  serving warm, fresh, & sweet custom, user-provided routes
-#  add them here
-###########################################################
+
+@custom_code.route('/data/<codeversion>/<name>', methods=['GET'])
+@myauth.requires_auth
+@nocache
+def download_datafiles(codeversion, name):
+    contents = {
+        "trialdata": lambda p: p.get_trial_data(),
+        "eventdata": lambda p: p.get_event_data(),
+        "questiondata": lambda p: p.get_question_data()
+    }
+
+    if name not in contents:
+        abort(404)
+
+    query = get_participants(codeversion)
+    data = []
+    for p in query:
+        try:
+            data.append(contents[name](p))
+        except TypeError:
+            current_app.logger.error("Error loading {} for {}".format(name, p))
+            current_app.logger.error(format_exc())
+            
+    # current_app.logger.critical('data %s', data)
+    ret = "".join(data)
+    response = Response(
+        ret,
+        content_type="text/csv",
+        headers={
+            'Content-Disposition': 'attachment;filename=%s.csv' % name
+        })
+
+    return response
+
+
+
 
 #----------------------------------------------
 # example custom route
 #----------------------------------------------
 @custom_code.route('/my_custom_view')
 def my_custom_view():
-	current_app.logger.info("Reached /my_custom_view")  # Print message to server.log for debugging 
-	try:
-		return render_template('custom.html')
-	except TemplateNotFound:
-		abort(404)
+    current_app.logger.info("Reached /my_custom_view")  # Print message to server.log for debugging 
+    try:
+        return render_template('custom.html')
+    except TemplateNotFound:
+        abort(404)
 
 #----------------------------------------------
 # example using HTTP authentication
@@ -46,10 +86,10 @@ def my_custom_view():
 @custom_code.route('/my_password_protected_route')
 @myauth.requires_auth
 def my_password_protected_route():
-	try:
-		return render_template('custom.html')
-	except TemplateNotFound:
-		abort(404)
+    try:
+        return render_template('custom.html')
+    except TemplateNotFound:
+        abort(404)
 
 #----------------------------------------------
 # example accessing data
@@ -58,10 +98,10 @@ def my_password_protected_route():
 @myauth.requires_auth
 def list_my_data():
         users = Participant.query.all()
-	try:
-		return render_template('list.html', participants=users)
-	except TemplateNotFound:
-		abort(404)
+    try:
+        return render_template('list.html', participants=users)
+    except TemplateNotFound:
+        abort(404)
 
 #----------------------------------------------
 # example computing bonus
@@ -97,4 +137,3 @@ def compute_bonus():
     except:
         abort(404)  # again, bad to display HTML, but...
 
-    
