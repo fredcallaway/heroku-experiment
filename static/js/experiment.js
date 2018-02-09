@@ -86,6 +86,11 @@ async function initializeExperiment() {
   // Test trials //
   /////////////////
 
+  var sorting = {
+    type: 'free-sort',
+    stimuli: ["static/images/blue.png", "static/images/orange.png"]
+  }
+
   var stimuli = [
     {
       stimulus: "static/images/blue.png",
@@ -108,6 +113,8 @@ async function initializeExperiment() {
     },
   }
 
+
+
   var test_block = {
     type: "image-keyboard-response",
     choices: ['F'],
@@ -120,7 +127,7 @@ async function initializeExperiment() {
 
   function getAverageResponseTime() {
 
-    var trials = jsPsych.data.getTrialsOfType('single-stim');
+    var trials = jsPsych.data.getTrialsOfType('html-keyboard-response');
 
     var sum_rt = 0;
     var valid_trial_count = 0;
@@ -155,8 +162,9 @@ async function initializeExperiment() {
   // so you don't have to click through them to test
   // the section you're working on.
   var timeline = [
-    welcome_block,
-    instructions_block,
+    // welcome_block,
+    // instructions_block,
+    sorting,
     test_block,
     debrief_block,
   ];
