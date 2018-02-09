@@ -97,7 +97,7 @@ def my_password_protected_route():
 @custom_code.route('/view_data')
 @myauth.requires_auth
 def list_my_data():
-        users = Participant.query.all()
+    users = Participant.query.all()
     try:
         return render_template('list.html', participants=users)
     except TemplateNotFound:

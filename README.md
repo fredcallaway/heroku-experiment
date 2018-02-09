@@ -36,3 +36,4 @@ TODO
     - `python3 -m http.server`
     - `make` every time you update exp.html
 - disabl cache
+- heroku deploy
