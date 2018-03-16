@@ -21,7 +21,7 @@ Note that requirements.txt is for the heroku app, not for your local environment
 ```
 4. Write config variables
 ```
-    ./set_config.py
+    bin/set_config.py
 ```
 
 ## Usage
