@@ -12,7 +12,7 @@ browser_exclude_rule = MSIE, mobile, tablet
 allow_repeats = false
 
 [Database Parameters]
-database_url = postgres://phksycwqvjvihv:fffc2332397e91358705a316e221170f2c5f062730b5543e527c51991a5b6ec2@ec2-23-21-162-90.compute-1.amazonaws.com:5432/db3oo8ssf6tcq7
+database_url = postgres://ucqrjszvxyepqv:de471fc8371e16c95648dd6bd3458bb5e833c92709f5231b4870c18a3bfbcebd@ec2-107-20-249-68.compute-1.amazonaws.com:5432/ddje1ebfitkk0n
 table_name = participants
 
 [Server Parameters]
@@ -26,7 +26,7 @@ login_username = user
 login_pw = pw
 threads = 1
 secret_key = 'this is my secret key which is hard to guess, i should change this'
-adserver_revproxy_host = salty-meadow-30207.herokuapp.com
+adserver_revproxy_host = robot-expt.herokuapp.com
 
 [Task Parameters]
 experiment_code_version = 1.0
