@@ -1,181 +1,132 @@
 
 async function initializeExperiment() {
-  LOG_DEBUG('initializeExperiment');
+  console.log('initializeExperiment');
 
-  ///////////
-  // Setup //
-  ///////////
-
-  // trials = await $.getJSON 'static/json/rewards/increasing.json'
-  const N_TRIAL = 4;
-
-  // This ensures that images appear exactly when we tell them to.
-  jsPsych.pluginAPI.preloadImages(['static/images/blue.png', 'static/images/orange.png']);
-
-  // To avoid repeating ourselves,  we create a variable for a piece
-  // of html that we use multiple times.
-  var anykey = "<div class='lower message'>Press any key to continue.</div>";
+	BONUS = 0
+	BONUS_RATE = 0.01
+	
+	var instruction = {
+		type: "instructions",
+		pages: [
+			'Welcome to the experiment. Click next to begin.',
+			'You are going to observe two groups of robots. One group comes from Boxby Land. The other group comes from Daxby Land. For this experiment, we try to draw a random sample from the robot population. In the robot world, Boxby Land is less populated, and as such, robots from Boxby Land occur less frequently in the pictures you will see.'
+		],
+		show_clickable_nav: true
+	}
 
 
-  //////////////////
-  // Instructions //
-  //////////////////
-
-  var welcome_block = {
-    type: "html-keyboard-response",
-    // We use the handy markdown function (defined in utils.js) to format our text.
-    stimulus: markdown(`
-    # My Sweet Experiment
-
-    This is a reworked version of the go/no-go task constructed in a
-    [tutorial](http://docs.jspsych.org/tutorials/rt-task/) 
-    on the jsPsych website. Note that the code here is a little different
-    than the original.
-
-    Specifically, the code here is better. 😉
-
-    ${anykey}
-    `)
-    // text: markdown(
-    //   `# Welcome
-
-    //   This is a reworked version of the go/no-go task constructed in a
-    //   [tutorial](http://docs.jspsych.org/tutorials/rt-task/) 
-    //   on the jsPsych website. Note that the code here is a little different
-    //   than the original.
-
-    //   Specifically, the code here is better 😉.
-
-    //   ${anykey}
-    // `)
-
-  };
-
-  var instructions_block = {
-    type: "html-keyboard-response",
-    // Sometimes we do need the additional control of html.
-    // We can mix markdown with html, but you can't use markdown
-    // inside an html element, which is why we use <b>html bold tags</b> 
-    // instead of the prettier **markdown format**.
-    stimulus: markdown(`
-      # Instructions
-
-      In this experiment, a circle will appear in the center 
-      of the screen. If the circle is **blue**, 
-      press the letter F on the keyboard as fast as you can.
-      If the circle is **orange**, do not press 
-      any key.
-      
-      <div class='center'>
-        <div class='left center'>
-          <img src='static/images/blue.png'></img>
-          <p><b>Press the F key</b></p>
-        </div>
-        <div class='right center'>
-          <img src='static/images/orange.png'></img>
-          <p><b>Do not press a key</b></p>
-        </div>
-      </div>
-
-      ${anykey}
-    `),
-    timing_post_trial: 2000
-  };
-
-  /////////////////
-  // Test trials //
-  /////////////////
-
-  var sorting = {
-    type: 'free-sort',
-    stimuli: ["static/images/blue.png", "static/images/orange.png"]
-  }
-
-  var stimuli = [
-    {
-      stimulus: "static/images/blue.png",
-      data: { response: 'go' }
-    },
-    {
-      stimulus: "static/images/orange.png",
-      data: { response: 'no-go' }
-    }
-  ];
-
-  var trials = jsPsych.randomization.repeat(stimuli, Math.floor(N_TRIAL / 2));
-
-  var fixation = {
-    type: 'html-keyboard-response',
-    stimulus: '<div style="margin-top: 90px; font-size:60px;">+</div>',
-    choices: jsPsych.NO_KEYS,
-    trial_duration() {
-      return Math.floor(Math.random() * 1500) + 750
-    },
-  }
+	var animation_trial = {
+		type: 'single-stim',
+		stimulus: "robot_land/population.png",
+		choices: ["y", "n"],
+		prompt: '<p class="center-content">Press y when you are ready.</p>'
+	};
 
 
+	/* load JSON file */
+	var stimuli = (function() {
+		var json = null;
+		$.ajax({
+			'async': false,
+			'global': false,
+			'url': "condition_stimuli.json",
+			'dataType': "json",
+			'success': function (data) {
+				json = data;
+			}
+		});
+		return json;
+	})();
 
-  var test_block = {
-    type: "image-keyboard-response",
-    choices: ['F'],
-    trial_duration: 1500,
-    timeline: _.flatten(trials.map(trial => [fixation, trial]))
-  };
+	var secondary_task_q = ['Please type in the number'];
+	var secondary_task = {
+		type: 'survey-text-force',
+		preamble: function() {
+			var digits = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"];
+			var digit_task = jsPsych.randomization.sample(digits, 7, true).join("");
+			var number = "<p style= 'color: blue; font-size: 48px;'>" + digit_task + "</p>";
+			return number + "<p>Memorize the digits shown above. We will ask you to recall these digits at the end of the experiment. Please don't write them down. Press the space key to continue.</p>"
+		},
+		questions: secondary_task_q,
+		is_html: true,
+		required: [true]
+	};
 
-  console.log(test_block)
+	var bonus_instruction = {
+		type: "instructions",
+		pages: [
+			`<p>For the following tasks, you will be asked to make some predictions.</p>
+			<p>You will receive a bonus of <strong> 1 cent </strong> for each correct prediction`
+		],
+		show_clickable_nav: true
+	}
+
+	var test = {
+		type: 'robot',
+		timeline: stimuli,
+		prompt: `<p class="center-content">
+			Where is this robot from?<br>
+			Press <b>D</b> for Daxby Land or <b>B</b> for Boxby Land.
+			</p>`,
+		choices: ['b', 'd'],
+		randomize_order: true
+	};
+
+	var recall_q = ["Please write down the digits shown to you at the beginning of the experiment."]
+
+	var recall = {
+		type: 'survey-text',
+		questions: recall_q
+	}
 
 
-  function getAverageResponseTime() {
+	var questions_boxby = ["<p>How many times has a robot with a <strong style = 'color: orange; font-weight: bold;'>yellow</strong> body appeared?</p> ", "<p>How many times has a robot with a  <strong style = 'color: blue; font-weight: bold;'> blue </strong> body appeared?</p>"]
+	var questions_daxby = ["<p>How many times has a robot with a <strong style = 'color: orange; font-weight: bold;'>yellow</strong> body appeared?</p>", "<p>How many times has a robot with a <strong style = 'color: blue; font-weight: bold;'> blue </strong> body appeared?</p>"]
+	var questions = ["<p>Out of 100 robots from Daxby Land, how many have a <strong style = 'color: orange; font-weight: bold;'>yellow</strong> body?</p>", "<p>Out of 100 robots from Boxby Land, how many have a <strong style = 'color: orange; font-weight: bold;'>yellow</strong> body?</p>"]
 
-    var trials = jsPsych.data.getTrialsOfType('html-keyboard-response');
+	var question_boxby={
+		type: 'survey-text-force',
+		preamble: ['<p style= "text-align: left; font-size: 50px;">For robots from <strong style = "font-size: 48px;">Boxby Land</strong></p>'],
+		questions: questions_boxby,
+		required: [true, true]
+	}
 
-    var sum_rt = 0;
-    var valid_trial_count = 0;
-    for (var i = 0; i < trials.length; i++) {
-      if (trials[i].response == 'go' && trials[i].rt > -1) {
-        sum_rt += trials[i].rt;
-        valid_trial_count++;
-      }
-    }
-    return Math.floor(sum_rt / valid_trial_count);
-  }
+	var question_daxby={
+		type: 'survey-text-force',
+		preamble: ['<p style= "text-align: left; font-size: 50px;">For robots from <strong style = "font-size: 48px;">Daxby Land</strong></p>'],
+		questions: questions_daxby,
+		required: [true, true]
+	}
 
-  var debrief_block = {
-    type: "html-keyboard-response",
-    // We don't want to
-    stimulus() {
-      return `
-        Your average response time was ${getAverageResponseTime()}.
-        Press any key to complete the experiment. Thanks!
-      `
-    }
-  };
+	var questions={
+		type: 'survey-text-force',
+		questions: questions,
+		required: [true, true]
+	}
+
+	var goodbye = {
+		type: "instructions",
+		pages: ['<p>Thanks so much for participating in this research.</p>' + `Your final bonus is $${BONUS.toFixed(2)}`],
+		show_clickable_nav: true
+	}
 
 
   /////////////////////////
   // Experiment timeline //
   /////////////////////////
 
-  // `timeline` determines the high-level structure of the
-  // experiment. When developing the experiment, you
-  // can comment out blocks you aren't working on
-  // so you don't have to click through them to test
-  // the section you're working on.
-  var timeline = [
-    // welcome_block,
-    // instructions_block,
-    sorting,
-    test_block,
-    debrief_block,
-  ];
+	var condition = 1
+	var timeline = []
+
+	if (condition == 1){
+		timeline.push(instruction, animation_trial, secondary_task, bonus_instruction, test, recall, question_boxby, question_daxby, questions, goodbye);
+	} else {
+		timeline.push(instruction, animation_trial, bonus_instruction, test, question_boxby, question_daxby, questions, goodbye);
+	}
 
 
   return startExperiment({
     timeline,
-    exclusions: {
-      min_width: 800,
-      min_height: 600
-    },
   });
 };
 

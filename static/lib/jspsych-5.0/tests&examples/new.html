@@ -1,0 +1,39 @@
+<html>
+
+<head>
+  <script src="js/jquery.min.js"></script>
+  <script src="../jspsych.js"></script>
+  <script src="../plugins/jspsych-single-stim.js"></script>
+  <link rel="stylesheet" href="../css/jspsych.css"></link>
+  <style>
+    img {
+      width: 300px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="jspsych-target" class="jspsych-display-element" style="border:1px solid red;"></div>
+  <div id="jspsych-trial-target" class="jspsych-display-element" style="border:1px solid blue; height: 300px;"></div>
+</body>
+
+  <script>
+
+  var overall = {
+    type: 'single-stim',
+    randomize_order: true,
+    timeline: [
+      {timeline:['s.jpg']},
+		{timeline:['Stimulus_2.png']}
+    ]
+  }
+
+  jsPsych.init({
+    display_element: $('#jspsych-target'),
+    timeline: [overall],
+    default_iti: 0,
+    on_finish: function() { jsPsych.data.displayData(); }
+  });
+
+  </script>
+</html>

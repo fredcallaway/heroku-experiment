@@ -1,0 +1,110 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Updating Variables</title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+        <script src="../jspsych.js"></script>
+        <script src="../plugins/jspsych-text.js"></script>
+		<script src="../plugins/jspsych-single-stim.js"></script>
+        <link href="jspsych-5.0.3/css/jspsych.css" rel="stylesheet" type="text/css"></link>
+	    <style>
+	      img {
+	        width: 800px;
+	      }
+	    </style>
+    </head>
+    
+	<body>
+	</body>
+	
+	<script>
+
+	/*This script is for updating variables. 
+	I have two variables, "projectA" and "projectB".
+	Each variable has a starting value, defined in the variables section as 1 and 3 respectively.
+	In each trial, if participants click "A", I want "projectA" to reduce by 1 and have this reduced number updated for the next trial.
+	Similarly, if participants click "B", I want "projectB" to reduce by 1 and have the reduced number updated for the next trial.
+	*/
+
+	
+	
+	/* Define variables */
+		
+	var limit = 4;
+	
+	/* trial1 */
+	
+	var trial1 = { 
+	type: 'single-stim', 
+    stimulus: 'img/Stimulus_1.png',
+    prompt: function() {if(limit > 5) {
+		return "<p>You have reached your limit.</p>";}
+		else {
+	return "<p class='center-content'>Press Y if you want this pair to be recorded. Press N if you don't want to take note of this pair.</p>";}},
+    choices: [89, 78],
+	on_finish: function (){
+    var data = jsPsych.data.getLastTrialData();
+	if(data.key_press == jsPsych.pluginAPI.convertKeyCharacterToKeyCode('Y')){
+		limit++;
+	} 
+}
+}
+	
+	/* trial2 */
+
+
+	var trial2 = { 
+	type: 'single-stim', 
+    stimulus: 'img/Stimulus_2.png',
+    prompt: function() {if(limit > 5) {
+		return "<p>You have reached your limit.</p>";}
+		else {
+	return "<p class='center-content'>Press Y if you want this pair to be recorded. Press N if you don't want to take note of this pair.</p>";}},
+    choices: [89, 78],
+		on_finish: function (){
+	    var data = jsPsych.data.getLastTrialData();
+		if(data.key_press == jsPsych.pluginAPI.convertKeyCharacterToKeyCode('Y')){
+			limit++;
+		} 
+	}
+}
+
+	/* trial3 */
+
+	var trial3 = { 
+	type: 'single-stim', 
+    stimulus: 'img/Stimulus_3.png',
+    prompt: function() {if(limit > 5) {
+		return "<p>You have reached your limit.</p>";}
+		else {
+	return "<p class='center-content'>Press Y if you want this pair to be recorded. Press N if you don't want to take note of this pair.</p>";}},
+    choices: [89, 78],
+		on_finish: function (){
+	    var data = jsPsych.data.getLastTrialData();
+		if(data.key_press == jsPsych.pluginAPI.convertKeyCharacterToKeyCode('Y')){
+			limit++;
+		} 
+	}
+}
+	
+	var timeline = []; 
+	timeline.push(trial1); 
+	timeline.push(trial2); 
+	timeline.push(trial3);
+	// timeline.push(trial3);
+	
+	
+	/* start experiment */
+	
+    jsPsych.init({ 
+    timeline: timeline,
+	on_finish: function() {
+    jsPsych.data.displayData('csv');
+	console.log()
+	//jsPsych.data.localSave('mydata.csv', 'csv'); 
+	}
+    });
+		
+		
+    </script>
+</html>

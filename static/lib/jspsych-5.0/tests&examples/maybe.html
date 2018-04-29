@@ -1,0 +1,110 @@
+<html>
+
+<head>
+  <script src="js/jquery.min.js"></script>
+  <script src="../jspsych.js"></script>
+  <script src="../plugins/jspsych-categorize.js"></script>
+  <script src="../plugins/jspsych-instructions.js"></script>
+  <script src="../plugins/jspsych-text.js"></script>
+    <script src="../plugins/jspsych-xab.js"></script>
+	    <script src="jspsych-6.0/plugins/jspsych-html-keyboard-response.js"></script>
+  <link rel="stylesheet" href="../css/jspsych.css"></link>
+  <style>
+    img {
+      width:600px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="jspsych-target"></div>
+</body>
+
+<script>
+
+	// var welcome = {
+	// 	type: "html-keyboard-response",
+	// 	stimulus: "Welcome! Press any key to begin."
+	// };
+
+	
+	var test_stimuli = [
+	  {stimulus: 'img/Stimulus_1.png'},
+	  	  {stimulus: 'img/Stimulus_2.png'},
+	        {stimulus: 'img/Stimulus_3.png'},
+	        {stimulus: 'img/Stimulus_4.png'},
+	        {stimulus: 'img/Stimulus_5.png'},
+	        {stimulus: 'img/Stimulus_6.png'},
+	        {stimulus: 'img/Stimulus_7.png'},
+	        {stimulus: 'img/Stimulus_8.png'},
+	        {stimulus: 'img/Stimulus_9.png'},
+	        {stimulus: 'img/Stimulus_10.png'},
+	        {stimulus: 'img/Stimulus_11.png'},
+	        {stimulus: 'img/Stimulus_12.png'},
+	        {stimulus: 'img/Stimulus_13.png'},
+	        {stimulus: 'img/Stimulus_14.png'},
+	        {stimulus: 'img/Stimulus_15.png'},
+	        {stimulus: 'img/Stimulus_16.png'}
+	];
+
+	var shuffledStimuli = jsPsych.randomization.repeat(test_stimuli , 1);
+	
+	var limit = 0;
+	var test_1 = {
+		type: 'categorize',
+		stimulus: 'img/Stimulus_1.png',
+    key_answer: 89,
+    choices: [89, 78],
+    correct_text: "<p class='center-content'>This pair will be recorded.</p>",
+    incorrect_text: "<p class='center-content'>This pair will not be recorded</p>",
+    prompt: function() {if(limit > 5) {
+		return "<p>You have reached your limit.</p>";}
+		else {
+	return "<p class='center-content'>Press Y if you want this pair to be recorded. Press N if you don't want to take note of this pair.</p>";}},
+    show_feedback_on_timeout: false,
+	force_correct_button_press: false,
+    on_finish: function(data){
+      var responses == data.response;
+		  if (data.response == 89) {
+			  limit += 1}
+		  }
+	// update_function: function(data){
+// 		var increment = jsPsych.data.get().last(1).values()[0];
+// 		limit = limit + increment;
+// 			}
+	};
+	var test_2 = {
+		type: 'categorize',
+		stimulus: 'img/Stimulus_2.png',
+    key_answer: 89,
+    choices: [89, 78],
+    correct_text: "<p class='center-content'>This pair will be recorded.</p>",
+    incorrect_text: "<p class='center-content'>This pair will not be recorded</p>",
+    prompt: function() {if(limit > 5) {
+		return "<p>You have reached your limit.</p>";}
+		else {
+	return "<p class='center-content'>Press 1 if you want this pair to be recorded. Press 2 if you don't want to take note of this pair.</p>";}},
+    show_feedback_on_timeout: false,
+	force_correct_button_press: false
+	// update_function: function(data){
+	// 	var increment =jsPsych.data.get().last(1).values()[0];
+	// 	limit = limit + increment;
+	// 				}
+	};
+	
+    jsPsych.init({
+      display_element: $('#jspsych-target'),
+      timeline: [test_1, test_2],
+      on_finish: function() {
+        jsPsych.data.displayData();
+      }
+    });
+
+	
+</script>
+	
+</html>
+	
+	
+	
+	

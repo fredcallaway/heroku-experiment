@@ -1,0 +1,87 @@
+<!doctype html>
+<html>
+
+<head>
+  <script src="js/jquery.min.js"></script>
+  <script src="../jspsych.js"></script>
+  <script src="../plugins/jspsych-categorize.js"></script>
+  <script src="../plugins/jspsych-instructions.js"></script>
+  <script src="../plugins/jspsych-text.js"></script>
+    <script src="../plugins/jspsych-xab.js"></script>
+  <link rel="stylesheet" href="../css/jspsych.css"></link>
+  <style>
+    img {
+      width:600px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="jspsych-target"></div>
+</body>
+<script>
+	
+// randomize trials
+// respones: if record pairs
+var code1, code2;
+  var observation_trials= {
+    type: 'categorize',
+	timeline: [{stimulus: 'img/Stimulus_1.png'}, 
+	  {stimulus: 'img/Stimulus_2.png'},
+      {stimulus: 'img/Stimulus_3.png'},
+      {stimulus: 'img/Stimulus_4.png'},
+      {stimulus: 'img/Stimulus_5.png'},
+      {stimulus: 'img/Stimulus_6.png'},
+      {stimulus: 'img/Stimulus_7.png'},
+      {stimulus: 'img/Stimulus_8.png'},
+      {stimulus: 'img/Stimulus_9.png'},
+      {stimulus: 'img/Stimulus_10.png'},
+      {stimulus: 'img/Stimulus_11.png'},
+      {stimulus: 'img/Stimulus_12.png'},
+      {stimulus: 'img/Stimulus_13.png'},
+      {stimulus: 'img/Stimulus_14.png'},
+      {stimulus: 'img/Stimulus_15.png'},
+      {stimulus: 'img/Stimulus_16.png'}],
+    key_answer: 89,
+    choices: [89, 78],
+    correct_text: "<p class='center-content'>This pair will be recorded.</p>",
+    incorrect_text: "<p class='center-content'>This pair will not be recorded</p>",
+    prompt: "<p class='center-content'>Press Y if you want this pair to be recorded. Press N if you don't want to take note of this pair.</p>",
+    show_feedback_on_timeout: false,
+	force_correct_button_press: false,
+	randomize_order: true,
+      data: {
+        node_data: true
+      },
+      on_finish: function(){
+        console.log(JSON.stringify(jsPsych.data.getLastTimelineData()));
+      }
+  //   on_finish: function(data){
+  //   var responses = JSON.parse(data.responses);
+  //       code1 = responses.Q0;
+  //       code2 = responses.Q1;
+  //       }
+  // };
+  // var randomdized = {
+  // 	  type: ''
+  }
+  
+  var alldata = jsPsych.data.getData();
+  var instructions =
+        {
+        type: "text",
+	  text: function() { return '<p class ="left-side-begin">Pleasant<br>or</br>'+alldata+'</p>'
+                                +'<p class ="right-side-begin">Unpleasant<br>or</br>'+code2+'</p>'
+        }
+        };
+
+  jsPsych.init({
+    display_element: $('#jspsych-target'),
+    timeline: [observation_trials, instructions],
+    on_finish: function() {
+      jsPsych.data.displayData();
+    }
+  });
+</script>
+
+</html>

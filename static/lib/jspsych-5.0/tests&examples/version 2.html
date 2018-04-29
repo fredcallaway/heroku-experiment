@@ -1,0 +1,45 @@
+<!doctype html>
+<html>
+  <head>
+    <script src="js/jquery.min.js"></script>
+    <script src="js/jquery-ui.min.js"></script>
+    <script src="../jspsych.js"></script>
+    <script src="../plugins/jspsych-survey-text.js"></script>
+	<script src="../plugins/jspsych-single-stim.js"></script>
+	<script src="../plugins/jspsych-text.js"></script>
+    <link rel="stylesheet" href="css/jquery-ui.css"></link>
+    <link rel="stylesheet" href="../css/jspsych.css"></link>
+  </head>
+  <body>
+    <div id="jspsych-target"></div>
+  </body>
+  <script>
+
+  // defining groups of questions that will go together.
+	  var code1, code2; // global scope for these
+
+	  var survey_trial = {
+	          type: 'survey-text',
+	          questions: ["Please type target 1", "Please type target 2"],
+	          on_finish: function(data){
+	      var responses = JSON.parse(data.responses);
+	          code1 = responses.Q0;
+
+	          code2 = responses.Q1;
+	          }
+	  };
+
+	  var instructions =
+	          {
+	          type: "text",
+			  text: function() { return '<p class ="left-side-begin">Pleasant<br>or</br>'+code1+'</p>'
+	                                  +'<p class ="right-side-begin">Unpleasant<br>or</br>'+code2+'</p>'
+	          }
+	          };
+
+	   jsPsych.init({
+	                  timeline: [survey_trial,instructions]
+	          });
+
+  </script>
+</html>

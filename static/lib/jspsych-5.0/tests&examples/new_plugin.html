@@ -1,0 +1,108 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Updating Variables</title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+        <script src="../jspsych.js"></script>
+		<script src="../plugins/jspsych-correlation.js"></script>
+		<script src="../plugins/jspsych-text.js"></script>
+		<script src="../plugins/jspsych-single-stim.js"></script>
+        <link href="jspsych-5.0.3/css/jspsych.css" rel="stylesheet" type="text/css"></link>
+<style>
+    * {
+      font-family: verdana;
+	  font-size: 30px;
+    }
+</style>
+<style>
+* {
+    vertical-align: middle;
+    line-height: 90px;
+    text-align: center;
+}
+</style>
+
+	</head>
+    
+<body>
+  <div id="jspsych-trial-target" class="jspsych-display-element" style="border:1px solid blue; height: 180px;"></div>
+</body>
+	
+	<script>
+
+	
+	
+	/* Define variables */
+		
+	var limit = 0;
+	var record_list = [];
+	var t = [
+  	  {flips: 'HHHTH', roll: '5'},
+	  {flips: 'HHHHT', roll: '6'},
+	{flips: 'HHHHH', roll: '6'},
+		{flips: 'HHHTT', roll: '4'},
+		{flips: 'HHTHH', roll: '5'},
+		{flips: 'HHTHT', roll: '3'},
+		{flips: 'HHTTT', roll: '2'},
+		{flips: 'HTHHH', roll: '6'},
+		{flips: 'HTHHT', roll: '2'},
+		{flips: 'HHTTH', roll: '2'},
+		{flips: 'HTHTH', roll: '3'},
+		{flips: 'HTHTT', roll: '3'},
+		{flips: 'HTTHH', roll: '2'},
+		{flips: 'HTTHT', roll: '2'},
+		{flips: 'HTTTH', roll: '2'},
+		{flips: 'HTTTT', roll: '1'}
+	];
+	/* trial */
+	
+	var trial = { 
+	type: 'correlation', 
+    timeline: t,
+    prompt: function() {if(limit > 5) {
+		return "<p>You have reached your limit.</p>";}
+		else {
+	return "<p>Press Y if you want this pair to be recorded. Press N if you don't want to take note of this pair.</p>";}},
+    choices: [89, 78],
+display_element: $('#jspsych-trial-target'),
+	randomize_order: true,
+	on_finish: function (){
+    var data = jsPsych.data.getLastTrialData();
+	if(data.key_press == jsPsych.pluginAPI.convertKeyCharacterToKeyCode('y')){
+		limit++;
+		if(limit <= 5){record_list.push(data.stimulus);}
+		};
+}
+};
+// dates.split(',').join("<br />")
+// var list_format = record_list[1].split(',');
+// list_format.splice (2, 0, "<br>");
+
+var relation =
+        {type: "single-stim",
+			prompt: "<p>Is there a relationship?</p>",
+			choices: [89, 78],
+is_html: true,
+			display_element: $('#jspsych-trial-target'),
+	  stimulus: function() { return '<p class ="left-side-begin">'+record_list+'</p>'
+        }
+        };
+
+/* order */
+
+var line = []; 
+line.push(trial);
+line.push(relation);
+
+
+/* start experiment */
+jsPsych.init({ 
+timeline: line,
+on_finish: function() {
+jsPsych.data.displayData('csv');
+console.log()
+//jsPsych.data.localSave('mydata.csv', 'csv'); 
+}
+});
+  </script>
+</html>

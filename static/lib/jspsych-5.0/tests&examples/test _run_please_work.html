@@ -1,0 +1,58 @@
+<!doctype html>
+<html>
+  <head>
+    <script src="js/jquery.min.js"></script>
+    <script src="js/jquery-ui.min.js"></script>
+    <script src="../jspsych.js"></script>
+    <script src="../plugins/jspsych-survey-text.js"></script>
+	<script src="../plugins/jspsych-single-stim.js"></script>
+	<script src="../plugins/jspsych-text.js"></script>
+    <link rel="stylesheet" href="css/jquery-ui.css"></link>
+    <link rel="stylesheet" href="../css/jspsych.css"></link>
+  </head>
+  <body>
+    <div id="jspsych-target"></div>
+  </body>
+  <script>
+
+	  // defining groups of questions that will go together.
+  var code 1;
+  var code 2;
+  var survey_trial = {
+	  type: 'survey-text',
+	  questions: ["Please type target 1", "Please type target 2"],
+	  on_finish: function(data){
+	  var responses = JSON.parse(data.responses);
+	  	code1 = responses.Q0;
+		code2 = responses.Q1;
+		}
+	  };
+
+  var instructions = {
+	  type: "text",
+	  text: function() { return '<p class ="left-side-begin">Pleasant<br>or</br>'+code1+'</p>'
+	  +'<p class ="righ-side-begin">Unpleasant<br>or</br>'+code2+'</p>'
+                 }
+	          };
+  var node = {
+	  type: 'single-stim',
+	  timeline: [survey_trial, instructions],
+	  choices: [89, 78],
+	  promp: '<p class="center-content">Have you seen this face before? Y or N.</p>',
+	  data: {
+		  node_data: true
+	  }
+  }
+			  
+  jsPsych.init({
+    display_element: $('#jspsych-target'),
+    timeline: [node],
+    on_finish: function() {
+      jsPsych.data.displayData();
+    },
+    default_iti: 250
+  });
+  //var page_1_questions = ["How old are you?", "Where were you born?"];
+
+  </script>
+</html>
