@@ -43,7 +43,7 @@ async function initializeExperiment() {
 
 	var secondary_task_q = ['Please type in the number'];
 	var secondary_task = {
-		type: 'survey-text',
+		type: 'survey-text-force',
 		preamble: function() {
 			var digits = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"];
 			var digit_task = jsPsych.randomization.sample(digits, 7, true).join("");
