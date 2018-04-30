@@ -5,6 +5,8 @@ async function initializeExperiment() {
 	BONUS = 0
 	BONUS_RATE = 0.01
   console.log('initializeExperiment');
+  jsPsych.pluginAPI.preloadImages(['static/images/robot_land/population.png', 'robot_land/yellow.png','robot_land/blue.png']);
+  
 	
 	var instruction = {
 		type: "instructions",
