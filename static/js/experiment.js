@@ -6,7 +6,6 @@ async function initializeExperiment() {
 	BONUS_RATE = 0.01
   
   jsPsych.pluginAPI.preloadImages(['static/images/robot_land/population.png', 'robot_land/yellow.png','robot_land/blue.png']);
-  console.log('static/images/robot_land/population.png');
 	
 	var instruction = {
 		type: "instructions",
@@ -32,7 +31,7 @@ async function initializeExperiment() {
 		$.ajax({
 			'async': false,
 			'global': false,
-			'url': "condition_stimuli.json",
+			'url': "static/condition_stimuli.json",
 			'dataType': "json",
 			'success': function (data) {
 				json = data;
@@ -40,7 +39,7 @@ async function initializeExperiment() {
 		});
 		return json;
 	})();
-	console.log('json');
+	console.log('j');
 
 	var secondary_task_q = ['Please type in the number'];
 	var secondary_task = {

@@ -4,7 +4,7 @@ jsPsych.plugins['survey-text-force'] = (function() {
   var plugin = {};
   
   plugin.trial = function(display_element, trial) {
-    var plugin_id_name = "jspsych-survey-text-force";
+    var plugin_id_name = "survey-text-force";
     var plugin_id_selector = '#' + plugin_id_name;
     var _join = function( /*args*/ ) {
       var arr = Array.prototype.slice.call(arguments, _join.length);
