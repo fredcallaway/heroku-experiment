@@ -39,21 +39,21 @@ async function initializeExperiment() {
 		});
 		return json;
 	})();
-	console.log('j');
+	console.log(json);
 
-	var secondary_task_q = ['Please type in the number'];
-	var secondary_task = {
-		type: 'survey-force',
-		preamble: function() {
-			var digits = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"];
-			var digit_task = jsPsych.randomization.sample(digits, 7, true).join("");
-			var number = "<p style= 'color: blue; font-size: 48px;'>" + digit_task + "</p>";
-			return number + "<p>Memorize the digits shown above. We will ask you to recall these digits at the end of the experiment. Please don't write them down. Press the space key to continue.</p>"
-		},
-		questions: secondary_task_q,
-		is_html: true,
-		required: [true]
-	};
+	// var secondary_task_q = ['Please type in the number'];
+	// var secondary_task = {
+	// 	type: 'survey-text-force',
+	// 	preamble: function() {
+	// 		var digits = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"];
+	// 		var digit_task = jsPsych.randomization.sample(digits, 7, true).join("");
+	// 		var number = "<p style= 'color: blue; font-size: 48px;'>" + digit_task + "</p>";
+	// 		return number + "<p>Memorize the digits shown above. We will ask you to recall these digits at the end of the experiment. Please don't write them down. Press the space key to continue.</p>"
+	// 	},
+	// 	questions: secondary_task_q,
+	// 	is_html: true,
+	// 	required: [true]
+	// };
 //
 // 	var bonus_instruction = {
 // 		type: "instructions",
@@ -64,16 +64,16 @@ async function initializeExperiment() {
 // 		show_clickable_nav: true
 // 	}
 //
-// 	var test = {
-// 		type: 'robot',
-// 		timeline: stimuli,
-// 		prompt: `<p class="center-content">
-// 			Where is this robot from?<br>
-// 			Press <b>D</b> for Daxby Land or <b>B</b> for Boxby Land.
-// 			</p>`,
-// 		choices: ['b', 'd'],
-// 		randomize_order: true
-// 	};
+	var test = {
+		type: 'robot',
+		timeline: stimuli,
+		prompt: `<p class="center-content">
+			Where is this robot from?<br>
+			Press <b>D</b> for Daxby Land or <b>B</b> for Boxby Land.
+			</p>`,
+		choices: ['b', 'd'],
+		randomize_order: true
+	};
 //
 // 	var recall_q = ["Please write down the digits shown to you at the beginning of the experiment."]
 //
@@ -126,7 +126,7 @@ async function initializeExperiment() {
 	// } else {
 	// 	timeline.push(instruction, animation_trial, bonus_instruction, test, question_boxby, question_daxby, questions, goodbye);
 	// }
-	var timeline = [instruction, introduction, secondary_task]
+	var timeline = [instruction, introduction, test]
 
   return startExperiment({
     timeline,

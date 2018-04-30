@@ -1,4 +1,4 @@
-jsPsych.plugins['survey-force'] = (function() {
+jsPsych.plugins['survey-text-force'] = (function() {
 
   var plugin = {};
   
