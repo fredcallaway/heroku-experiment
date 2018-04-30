@@ -160,7 +160,7 @@ jsPsych.plugins['survey-text-force'] = (function() {
 
     var startTime = (new Date()).getTime();
 
-  };
+  }) ();
 
   return plugin;
 })();
