@@ -1,5 +1,5 @@
-jsPsych.plugins['survey-text-force'] = (function() {
-
+jsPsych.plugins["survey-text-force"] = (function() {
+  console.log("load please")
   var plugin = {};
   
   plugin.trial = function(display_element, trial) {

@@ -44,7 +44,7 @@ async function initializeExperiment() {
 
 	var secondary_task_q = ['Please type in the number'];
 	var secondary_task = {
-		type: 'survey-text-force',
+		type: "survey-text-force",
 		preamble: function() {
 			var digits = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"];
 			var digit_task = jsPsych.randomization.sample(digits, 7, true).join("");
@@ -66,7 +66,7 @@ async function initializeExperiment() {
 // 	}
 //
 	var test = {
-		type: 'robot',
+		type: "robot",
 		timeline: stimuli,
 		prompt: `<p class="center-content">
 			Where is this robot from?<br>

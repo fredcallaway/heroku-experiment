@@ -4,7 +4,7 @@ delay = function(time, func) {
 
 
 jsPsych.plugins["robot"] = (function() {
-
+  console.log('load')
   var plugin = {};
 
   plugin.trial = function(display_element, trial) {
