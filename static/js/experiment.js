@@ -41,19 +41,19 @@ async function initializeExperiment() {
 	})();
 
 
-	// var secondary_task_q = ['Please type in the number'];
-	// var secondary_task = {
-	// 	type: 'survey-text-force',
-	// 	preamble: function() {
-	// 		var digits = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"];
-	// 		var digit_task = jsPsych.randomization.sample(digits, 7, true).join("");
-	// 		var number = "<p style= 'color: blue; font-size: 48px;'>" + digit_task + "</p>";
-	// 		return number + "<p>Memorize the digits shown above. We will ask you to recall these digits at the end of the experiment. Please don't write them down. Press the space key to continue.</p>"
-	// 	},
-	// 	questions: secondary_task_q,
-	// 	is_html: true,
-	// 	required: [true]
-	// };
+	var secondary_task_q = ['Please type in the number'];
+	var secondary_task = {
+		type: 'survey-text',
+		preamble: function() {
+			var digits = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"];
+			var digit_task = jsPsych.randomization.sample(digits, 7, true).join("");
+			var number = "<p style= 'color: blue; font-size: 48px;'>" + digit_task + "</p>";
+			return number + "<p>Memorize the digits shown above. We will ask you to recall these digits at the end of the experiment. Please don't write them down. Press the space key to continue.</p>"
+		},
+		questions: secondary_task_q,
+		is_html: true,
+		required: [true]
+	};
 //
 // 	var bonus_instruction = {
 // 		type: "instructions",
