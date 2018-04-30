@@ -20,7 +20,7 @@ jsPsych.plugins["robot"] = (function() {
     //   {'color': 'red', 'group': 'boxby'},
 
     console.log('ROBOT TRIAL')
-    html = `<img class='display robot' src='robot_land/${trial.color}.png'>`;
+    html = `<img class='display robot' src='static/images/robot_land/${trial.color}.png'>`;
     console.log(html)
     $('<div>', {id: 'stage'}).html(html).appendTo(display_element);
     var $feedback = $('<div>', {id: 'feedback'}).appendTo(display_element);
