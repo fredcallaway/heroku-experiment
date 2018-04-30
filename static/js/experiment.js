@@ -16,7 +16,7 @@ async function initializeExperiment() {
 	}
 
 
-	var animation_trial = {
+	var introduction = {
 		type: 'single-stim',
 		stimulus: "robot_land/population.png",
 		choices: ["y", "n"],
@@ -124,7 +124,7 @@ async function initializeExperiment() {
 	// } else {
 	// 	timeline.push(instruction, animation_trial, bonus_instruction, test, question_boxby, question_daxby, questions, goodbye);
 	// }
-	var timeline = [instruction]
+	var timeline = [instruction, introduction]
 
   return startExperiment({
     timeline,
