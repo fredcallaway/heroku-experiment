@@ -14,15 +14,15 @@ async function initializeExperiment() {
 		],
 		show_clickable_nav: true
 	}
-//
-//
-// 	var animation_trial = {
-// 		type: 'single-stim',
-// 		stimulus: "robot_land/population.png",
-// 		choices: ["y", "n"],
-// 		prompt: '<p class="center-content">Press y when you are ready.</p>'
-// 	};
-//
+
+
+	var animation_trial = {
+		type: 'single-stim',
+		stimulus: "robot_land/population.png",
+		choices: ["y", "n"],
+		prompt: '<p class="center-content">Press y when you are ready.</p>'
+	};
+
 //
 // 	/* load JSON file */
 // 	var stimuli = (function() {
