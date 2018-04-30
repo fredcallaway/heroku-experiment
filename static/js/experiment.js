@@ -18,7 +18,7 @@ async function initializeExperiment() {
 
 	var introduction = {
 		type: 'single-stim',
-		stimulus: "robot_land/population.png",
+		stimulus: "static/images/robot_land/population.png",
 		choices: ["y", "n"],
 		prompt: '<p class="center-content">Press y when you are ready.</p>'
 	};
