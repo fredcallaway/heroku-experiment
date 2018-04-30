@@ -25,35 +25,36 @@ async function initializeExperiment() {
 		prompt: '<p class="center-content">Press y when you are ready.</p>'
 	};
 
-//
-// 	/* load JSON file */
-// 	var stimuli = (function() {
-// 		var json = null;
-// 		$.ajax({
-// 			'async': false,
-// 			'global': false,
-// 			'url': "condition_stimuli.json",
-// 			'dataType': "json",
-// 			'success': function (data) {
-// 				json = data;
-// 			}
-// 		});
-// 		return json;
-// 	})();
-//
-// 	var secondary_task_q = ['Please type in the number'];
-// 	var secondary_task = {
-// 		type: 'survey-text-force',
-// 		preamble: function() {
-// 			var digits = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"];
-// 			var digit_task = jsPsych.randomization.sample(digits, 7, true).join("");
-// 			var number = "<p style= 'color: blue; font-size: 48px;'>" + digit_task + "</p>";
-// 			return number + "<p>Memorize the digits shown above. We will ask you to recall these digits at the end of the experiment. Please don't write them down. Press the space key to continue.</p>"
-// 		},
-// 		questions: secondary_task_q,
-// 		is_html: true,
-// 		required: [true]
-// 	};
+
+	/* load JSON file */
+	var stimuli = (function() {
+		var json = null;
+		$.ajax({
+			'async': false,
+			'global': false,
+			'url': "condition_stimuli.json",
+			'dataType': "json",
+			'success': function (data) {
+				json = data;
+			}
+		});
+		return json;
+	})();
+	console.log('json');
+
+	var secondary_task_q = ['Please type in the number'];
+	var secondary_task = {
+		type: 'survey-text-force',
+		preamble: function() {
+			var digits = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"];
+			var digit_task = jsPsych.randomization.sample(digits, 7, true).join("");
+			var number = "<p style= 'color: blue; font-size: 48px;'>" + digit_task + "</p>";
+			return number + "<p>Memorize the digits shown above. We will ask you to recall these digits at the end of the experiment. Please don't write them down. Press the space key to continue.</p>"
+		},
+		questions: secondary_task_q,
+		is_html: true,
+		required: [true]
+	};
 //
 // 	var bonus_instruction = {
 // 		type: "instructions",
@@ -126,7 +127,7 @@ async function initializeExperiment() {
 	// } else {
 	// 	timeline.push(instruction, animation_trial, bonus_instruction, test, question_boxby, question_daxby, questions, goodbye);
 	// }
-	var timeline = [instruction, introduction]
+	var timeline = [instruction, introduction, secondary_task]
 
   return startExperiment({
     timeline,
