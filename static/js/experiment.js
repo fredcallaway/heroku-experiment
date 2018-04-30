@@ -1,6 +1,7 @@
 
 async function initializeExperiment() {
   console.log('initializeExperiment');
+  console.log('data');
 
 	BONUS = 0
 	BONUS_RATE = 0.01
