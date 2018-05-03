@@ -28,7 +28,7 @@ for section in sections:
         if val.startswith('Your'):
             print('ERROR: {key} is not defined in ~/.psiturkconfig'.format(**locals()))
             print('http://psiturk.readthedocs.io/en/latest/configuration.html#global-configuration-file')
-            continue
+            exit(1)
 
         #print 'heroku config:set ' + '='.join(item)
         bash('heroku config:set {key}={val}'.format(**locals()))
