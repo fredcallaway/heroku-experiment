@@ -16,7 +16,7 @@ Note that requirements.txt is for the heroku app, not for your local environment
 2. Create a Heroku account and install the [Heroku toolbelt](https://toolbelt.heroku.com/)
 3. Create a new app and add a Postgres database
 ```
-    heroku create YOUR_APP_NAME
+    heroku create YOUR_APP_NAME --buildpack heroku/python
     heroku git:remote -a YOUR_APP_NAME
     heroku addons:create heroku-postgresql
 ```
