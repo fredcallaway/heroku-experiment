@@ -37,11 +37,3 @@ You will now have a config.txt file in this directory.
 ### Post HITs
 
 Start the psiturk shell with the command `psiturk`. Run `hit create 30 1.50 0.5` to create 30 hits, each of which pays $1.50 and has a 30 minute time limit. You'll get a warning about your server not running. You are using an external server process, so you can press `y` to bypass the error message.
-
-
-TODO 
-- static
-    - `python3 -m http.server`
-    - `make` every time you update exp.html
-- disabl cache
-- heroku deploy
