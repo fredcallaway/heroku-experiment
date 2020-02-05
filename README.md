@@ -4,9 +4,9 @@ A starter pack for running online experiments with Psiturk on Heroku.
 
 ## Requirements
 
-Sadly, PsiTurk requires Python 2.7. If you don't have `pip2`, try using `pip`.
+As of version v2.3.1, psiturk supports Python 3. Install the bleeding edge version with the following command.
 
-    pip2 install git+https://github.com/NYUCCL/psiTurk psycopg2-binary
+    pip install git+https://github.com/NYUCCL/psiTurk
 
 Note that requirements.txt is for the heroku app, not for your local environment.
 
