@@ -15,29 +15,33 @@
         {% if errornum == 1008 %}
 
         <p><b>Sorry, our records indicate that you have attempted to
-        complete this hit, but quit before finishing.</b></p>        
+        complete this hit, but quit before finishing.</b></p>
 
         <p>Because this is a Psychology experiment, you can only
         complete this hit once.</p>
 
         <p>Please release the hit so someone else can perform the
-        experiment.</p> 
-        
+        experiment.</p>
+
         {% elif errornum == 1010 %}
-        
-        <h2> 
+
+        <h2>
           Sorry, our records indicate that you have already completed (or
           attempted to complete) this hit.
-        </h2>        
+        </h2>
         <p>Because this is a Psychology experiment, you can only complete
-        this hit once.</p> 
-        
+        this hit once.</p>
+
         <p>Please release the hit so someone else can perform the
-        experiment.</p> 
-        
+        experiment.</p>
+
+        {% elif errornum == 1014 %}
+        <h2>Sorry, it looks like you're not using an allowed browser or device</h2>
+        <p>You cannot complete this HIT using a mobile device or Internet Explorer.</p>
+
         {% else %}
 
-        <h2> 
+        <h2>
           Sorry, there was an unexpected error in our processing of your
           hit.
         </h2>
@@ -45,8 +49,9 @@
         {% endif %}
 
         <p>If you would like to receive partial compensation or feel you
-        have reached this page in error, please email <a
-        href="mailto:fredcallaway@berkeley.edu">fredcallaway@berkeley.edu</a>
+        have reached this page in error, please email
+        us
+        <!-- at <a href="mailto:YOUR@EMAIL.COM">YOUR@EMAIL.COM</a> -->
         and send the following information:</p>
 
         <div id="error-message">
