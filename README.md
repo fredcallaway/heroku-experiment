@@ -26,7 +26,9 @@ Note that requirements.txt is for the heroku app, not for your local environment
 ```
 You will now have a config.txt file in this directory. 
 
-5. Push to heroku
+5. Add university-specific information in the template. Check templates/ad.html, templates/error.html, and config.txt for any mention of "Bodacious" University and replace with a more appropriate reference. You should also put your IRB-approved consent form in templates/consent.hmtl
+
+6. Push to heroku
 ```
     git add .
     git commit -m 'my first commit'
