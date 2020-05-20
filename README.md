@@ -20,7 +20,7 @@ Note that requirements.txt is for the heroku app, not for your local environment
     heroku git:remote -a YOUR_APP_NAME
     heroku addons:create heroku-postgresql
 ```
-4. Write config variables
+4. Write config variables ** THIS IS BROKEN IN PYTHON 3 :( **
 ```
     bin/set_config.py
 ```
