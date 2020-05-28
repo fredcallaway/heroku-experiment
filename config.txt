@@ -12,7 +12,7 @@ browser_exclude_rule = MSIE, mobile, tablet
 allow_repeats = false
 
 [Database Parameters]
-database_url = postgres://phksycwqvjvihv:fffc2332397e91358705a316e221170f2c5f062730b5543e527c51991a5b6ec2@ec2-23-21-162-90.compute-1.amazonaws.com:5432/db3oo8ssf6tcq7
+database_url = sqlite:///participants.db
 table_name = participants
 
 [Server Parameters]
