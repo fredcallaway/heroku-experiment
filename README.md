@@ -4,13 +4,16 @@ A starter pack for running online experiments with Psiturk on Heroku.
 
 ## Requirements
 
-As of version v2.3.1, psiturk supports Python 3. Install the bleeding edge version with the following command.
+This project works with Python 3. Install requirements with
+```
+pip install -r requirements.txt
+```
 
-    pip install git+https://github.com/NYUCCL/psiTurk
+You can run experiment code in a number of ways:
+- Preview [index.html](index.html) in your browser.
+- To test the entire experiment, run `make dev` then visit [http://localhost:22362](http://localhost:22362). You can also preview the experiment page [here](http://localhost:22362/testexperiment).
 
-Note that requirements.txt is for the heroku app, not for your local environment.
-
-## Setup
+## Heroku Setup & Customization
 
 1. Clone this repository
 2. Create a Heroku account and install the [Heroku toolbelt](https://toolbelt.heroku.com/)
@@ -20,18 +23,10 @@ Note that requirements.txt is for the heroku app, not for your local environment
     heroku git:remote -a YOUR_APP_NAME
     heroku addons:create heroku-postgresql
 ```
-4. Write config variables ** THIS IS BROKEN IN PYTHON 3 :( **
-```
-    bin/set_config.py
-```
-You will now have a config.txt file in this directory. 
+4. Add university-specific information in the template. Check templates/ad.html, templates/error.html, and config.txt for any mention of "Bodacious" University and replace with a more appropriate reference. You should also put your IRB-approved consent form in templates/consent.html.
 
-5. Add university-specific information in the template. Check templates/ad.html, templates/error.html, and config.txt for any mention of "Bodacious" University and replace with a more appropriate reference. You should also put your IRB-approved consent form in templates/consent.hmtl
-
-6. Push to heroku
+5. Once you've made your changes and committed, you can push to Heroku with the following command:
 ```
-    git add .
-    git commit -m 'my first commit'
     git push heroku master
 ```
 
