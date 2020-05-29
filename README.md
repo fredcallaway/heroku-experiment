@@ -35,3 +35,8 @@ You can run experiment code in a number of ways:
 ### Post HITs
 
 Start the psiturk shell with the command `psiturk`. Run `hit create 30 1.50 0.5` to create 30 hits, each of which pays $1.50 and has a 30 minute time limit. You'll get a warning about your server not running. You are using an external server process, so you can press `y` to bypass the error message.
+
+## Contributors
+
+- Fred Callaway
+- Carlos Correa
