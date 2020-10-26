@@ -127,7 +127,7 @@ async function initializeExperiment() {
 
   function getAverageResponseTime() {
 
-    var trials = jsPsych.data.getTrialsOfType('html-keyboard-response');
+    var trials = jsPsych.data.get().filter({trial_type: 'image-keyboard-response'}).values();
 
     var sum_rt = 0;
     var valid_trial_count = 0;
