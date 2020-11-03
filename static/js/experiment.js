@@ -113,17 +113,12 @@ async function initializeExperiment() {
     },
   }
 
-
-
   var test_block = {
     type: "image-keyboard-response",
     choices: ['F'],
     trial_duration: 1500,
     timeline: _.flatten(trials.map(trial => [fixation, trial]))
   };
-
-  console.log(test_block)
-
 
   function getAverageResponseTime() {
 

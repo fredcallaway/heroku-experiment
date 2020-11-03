@@ -2,11 +2,16 @@
 // coffeelint: disable=max_line_length, indentation
 
 // ---------- Experiment modes ---------- #
-var CONDITION, DEBUG, LOCAL, LOG_DEBUG, handleError, psiturk, saveData, startExperiment, submitHit;
+var CONDITION, DEBUG, LOCAL, PROLIFIC, LOG_DEBUG, handleError, psiturk, saveData, startExperiment, submitHit;
 
-DEBUG = false;
+searchParams = new URLSearchParams(location.search)
 
 LOCAL = false;
+DEBUG = searchParams.get('debug') == 'true';
+PROLIFIC = (searchParams.get('prolific') == 'true') || 
+  (searchParams.get('hitId') == null) || 
+  (searchParams.get('hitId') == 'prolific');
+
 
 if (mode === "{{ mode }}") {
   LOCAL = true;
@@ -91,6 +96,14 @@ startExperiment = function(config) {
   return jsPsych.init(_.extend(defaults, config));
 };
 
+completeHIT = function() {
+  if (PROLIFIC) {
+    $(window).off("beforeunload"); $('#prolific-complete').show()
+  } else {
+    psiturk.completeHIT()
+  }
+}
+
 submitHit = function() {
   var promptResubmit, triesLeft;
   console.log('submitHit');
@@ -105,7 +118,7 @@ submitHit = function() {
       return saveData().catch(promptResubmit);
     } else {
       console.log('GIVE UP');
-      $('#jspsych-target').html("<div class=\"alert alert-danger\">\n  <strong>Error!</strong>\n  We couldn't save your data! Please contact cocosci.turk@gmail.com to report\n  the error. Then click the button below.\n</div>\n<br><br>\n<button class='btn btn-primary btn-lg' id=\"resubmit\">I reported the error</button>");
+      $('#jspsych-target').html("<div class=\"alert alert-danger\">\n  <strong>Error!</strong>\n  We couldn't save your data! Please contact email@bodacious.edu to report\n  the error. Then click the button below.\n</div>\n<br><br>\n<button class='btn btn-primary btn-lg' id=\"resubmit\">I reported the error</button>");
       return new Promise(function(resolve) {
         return $('#resubmit').click(function() {
           return resolve('gave up');
@@ -113,7 +126,7 @@ submitHit = function() {
       });
     }
   };
-  return saveData().then(psiturk.completeHIT).catch(promptResubmit).then(psiturk.completeHIT);
+  return saveData().then(psiturk.completeHIT).catch(promptResubmit).then(completeHIT);
 };
 
 handleError = function(e) {
@@ -131,7 +144,7 @@ handleError = function(e) {
   }
   psiturk.recordUnstructuredData('error', msg);
   message = `<pre>\n  HitID: ${(typeof hitId !== "undefined" && hitId !== null ? hitId[0] : 'N/A')}\n  AssignId: ${(typeof assignId !== "undefined" && assignId !== null ? assignId : 'N/A')}\n  WorkerId: ${(typeof workerId !== "undefined" && workerId !== null ? workerId[0] : 'N/A')}\n\n  ${msg}\n</pre>`;
-  link = '<a href="mailto:cocosci.turk@gmail.com?subject=ERROR in experiment' + '&body=#{encodeURIComponent(message)}">Click here</a>';
-  $('#jspsych-target').html(markdown(`# The experiment encountered an error!\n\n${link} to report the error by email. Please describe at what point in the HIT the error\noccurred, and include the following\n\n${message}\n\nThen click the button below to submit the HIT.\nIf you have trouble submitting the HIT, please\ncontact <cocosci.turk@gmail.com>\n\n<button id="submit">Submit HIT</button>`));
+  link = '<a href="mailto:email@bodacious.edu?subject=ERROR in experiment' + '&body=#{encodeURIComponent(message)}">Click here</a>';
+  $('#jspsych-target').html(markdown(`# The experiment encountered an error!\n\n${link} to report the error by email. Please describe at what point in the HIT the error\noccurred, and include the following\n\n${message}\n\nThen click the button below to submit the HIT.\nIf you have trouble submitting the HIT, please\ncontact <email@bodacious.edu>\n\n<button id="submit">Submit HIT</button>`));
   return $('#submit').click(submitHit);
 };
