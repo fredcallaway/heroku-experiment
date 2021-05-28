@@ -156,13 +156,17 @@ async function initializeExperiment() {
   // can comment out blocks you aren't working on
   // so you don't have to click through them to test
   // the section you're working on.
+
   var timeline = [
-    // welcome_block,
-    // instructions_block,
-    sorting,
+    welcome_block,
+    instructions_block,
     test_block,
     debrief_block,
   ];
+
+  if (searchParams.get('skip') != null) {
+    timeline.splice(0, parseInt(searchParams.get('skip')))
+  }
 
 
   return startExperiment({

@@ -126,7 +126,7 @@ submitHit = function() {
       });
     }
   };
-  return saveData().then(psiturk.completeHIT).catch(promptResubmit).then(completeHIT);
+  return saveData().then(completeHIT).catch(promptResubmit).then(completeHIT);
 };
 
 handleError = function(e) {
