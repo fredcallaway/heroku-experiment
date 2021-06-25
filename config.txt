@@ -24,7 +24,7 @@ loglevel = 2
 debug = true
 login_username = user
 login_pw = pw
-threads = auto
+threads = 2
 secret_key = 'this is my secret key which is hard to guess, i should change this'
 adserver_revproxy_host = fredtest1.herokuapp.com
 
