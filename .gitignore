@@ -1,5 +1,6 @@
 .psiturk_history
 server.log
+data/human_raw
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
