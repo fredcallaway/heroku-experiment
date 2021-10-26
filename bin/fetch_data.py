@@ -173,8 +173,7 @@ def get_data_url():
         return url
         
 if __name__ == "__main__":
-    parser = ArgumentParser(
-        formatter_class=ArgumentDefaultsHelpFormatter)
+    parser = ArgumentParser(formatter_class=ArgumentDefaultsHelpFormatter)
     parser.add_argument(
         "version",
         nargs="?",
