@@ -34,6 +34,7 @@ if (DEBUG) {
 
 // ---------- Initialize PsiTurk ---------- #
 psiturk = new PsiTurk(uniqueId, adServerLoc, mode);
+psiturk.recordUnstructuredData('startTime', String(new Date()))
 
 saveData = function() {
   console.log('saveData');
