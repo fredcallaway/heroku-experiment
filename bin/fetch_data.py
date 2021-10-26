@@ -47,13 +47,13 @@ class Labeler(object):
 
 def fetch(site_root, filename, version, auth, force=True):
     """Download `filename` from `site_root` and save it in the
-    data/human_raw/`version` data folder.
+    data/raw/`version` data folder.
     """
     url = os.path.join(site_root, version, filename)
 
     # get the destination to save the data, and don't do anything if
     # it exists already
-    dest = os.path.join('data/human_raw', version, "{}.csv".format(os.path.splitext(filename)[0]))
+    dest = os.path.join('data/raw', version, "{}.csv".format(os.path.splitext(filename)[0]))
     if os.path.exists(dest) and not force:
         print('{} already exists. Use --force to overwrite.'.format(dest))
         return
@@ -86,7 +86,7 @@ def fetch(site_root, filename, version, auth, force=True):
 
 
 def reformat_data(version):
-    data_path = 'data/human_raw/{}/'.format(version)
+    data_path = 'data/raw/{}/'.format(version)
     identifiers = {'worker_id': [], 'assignment_id': [], 'wid': []}
 
     # Create participants dataframe (pdf).
@@ -141,7 +141,7 @@ def reformat_data(version):
 
 
     # Write data.
-    path = 'data/human/{}/'.format(version)
+    path = 'data/processed/{}/'.format(version)
     if not os.path.isdir(path):
         os.makedirs(path)
     for name, df in data.items():
