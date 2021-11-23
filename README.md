@@ -28,7 +28,7 @@ You can confirm that the heroku site has been created with the `heroku domains`,
     git push heroku master
 ```
 
-If you get an error saying you are saygin  version, try updating runtime.txt with one of the supported versions listed [here](https://devcenter.heroku.com/articles/python-support).
+If you get an error such as `Requested runtime (python-X.Y.Z) is not available for this stack`, try updating runtime.txt with a supported version listed [here](https://devcenter.heroku.com/articles/python-support).
 
 ## Usage
 
