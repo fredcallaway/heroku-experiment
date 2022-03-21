@@ -21,8 +21,8 @@ pip install -r requirements.txt
 ```
 You can confirm that the heroku site has been created with the `heroku domains`, which will print the domain of your shiny new website!
 
-4. Add university-specific information in the template. Check templates/ad.html, templates/error.html, and config.txt for any mention of "Bodacious" University and replace with a more appropriate reference. You should also put your IRB-approved consent form in templates/consent.html.
-
+4. Add university-specific information in the template. Check templates/ad.html, templates/error.html, and config.txt for any mention of "Bodacious" University and replace with a more appropriate reference. In particular make sure to replace all occurrences of email@bodacious.edu with a correct email address.
+5. Put your IRB-approved consent form in templates/consent.html.
 5. Once you've made your changes and committed, you can push to Heroku with the following command:
 ```
     git push heroku master
@@ -50,11 +50,12 @@ Start the psiturk shell with the command `psiturk`. Run `hit create 30 1.50 0.5`
 
 ### Running on Prolific
 
-You need to create the study with Prolific's web interface. Use the following link (using the correct domain of course):
+You need to create the study with Prolific's web interface. 
 
-https://<YOUR_APP_NAME>.herokuapp.com/consent?mode=live&workerId={{%PROLIFIC_PID%}}&hitId=prolific&assignmentId={{%SESSION_ID%}}
-
-Make sure to replace `<YOUR_APP_NAME>` in the link with your app name. Also replace all three instances of `PROLIFIC_CODE` in templates/exp.html with the code Prolific gives you. As always, do a dry run with Prolific's "preview" mechanism before actually posting the study. I also recommend running only a couple people on your first go in case there are unforseen issues.
+1. Set the URL to. `https://<YOUR_APP_NAME>.herokuapp.com/consent?mode=live&workerId={{%PROLIFIC_PID%}}&hitId=prolific&assignmentId={{%SESSION_ID%}}`. Make sure to replace `<YOUR_APP_NAME>` in the link with your app name!
+2. Make sure "I'll use URL parameters" is checked.
+3. Select "I'll redirect them using a URL". Copy the code and set it as `PROLIFIC_CODE` in experiment.js, e.g. `const PROLIFIC_CODE = "6A5FDC7A"`.
+4. As always, do a dry run with Prolific's "preview" mechanism before actually posting the study. I also recommend running only a couple people on your first go in case there are unforseen issues.
 
 ### Downloading data
 
