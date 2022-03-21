@@ -4,23 +4,25 @@ A starter pack for running online experiments with Psiturk on Heroku.
 
 ## Requirements
 
-This project works with Python 3. Install requirements with
-```
-pip install -r requirements.txt
-```
+You must have Python 3 and a Unix-based OS (Linux or Mac).
 
-## Heroku Setup & Customization
+## Setup
 
-1. Create a new repository using this repository as a template (on github there is a green "Use this template" button at the top of the page).
-2. Create a Heroku account and install the [Heroku toolbelt](https://toolbelt.heroku.com/). Ensure that you're logged in correctly with `heroku auth:whoami`
-3. Create a new app and add a Postgres database
+1. Create a new repository using this repository as a template (on github there is a green "Use this template" button at the top of the page). Clone the new repository to your machine and `cd` into the directory from a terminal.
+2. Create a virtual environment and install the requirements with the following commands. **Windows users should skip this step.**
+```
+    python3 -m venv env
+    source env/bin/activate   
+    pip install -r requirements.txt
+```
+3. Create a Heroku account and install the [Heroku toolbelt](https://toolbelt.heroku.com/). Ensure that you're logged in correctly with `heroku auth:whoami`
+4. Create a new app and add a Postgres database
 ```
     heroku create YOUR_APP_NAME --buildpack heroku/python
     heroku git:remote -a YOUR_APP_NAME
     heroku addons:create heroku-postgresql
 ```
 You can confirm that the heroku site has been created with the `heroku domains`, which will print the domain of your shiny new website!
-
 4. Add university-specific information in the template. Check templates/ad.html, templates/error.html, and config.txt for any mention of "Bodacious" University and replace with a more appropriate reference. In particular make sure to replace all occurrences of email@bodacious.edu with a correct email address.
 5. Put your IRB-approved consent form in templates/consent.html.
 5. Once you've made your changes and committed, you can push to Heroku with the following command:
@@ -30,11 +32,17 @@ You can confirm that the heroku site has been created with the `heroku domains`,
 
 If you get an error such as `Requested runtime (python-X.Y.Z) is not available for this stack`, try updating runtime.txt with a supported version listed [here](https://devcenter.heroku.com/articles/python-support).
 
-## Usage
+
 
 ### Preview experiment
 
 After installing the requirements, run `make dev` in a terminal. Then visit [http://localhost:22362](http://localhost:22362). The "22362" is set in config.txt and you can change that value if you like (e.g., to allow previewing multiple experiments at once).
+
+## Previewing on Windows
+
+Psiturk does not support Windows. Although you cannot running the psiturk server (which tests all aspects of the application), you can still view the experiment as you develop it. To do so, use `python3 -m http.server`. You may need to [disable the cache](https://www.technipages.com/google-chrome-how-to-completely-disable-cache) in your browser to see your changes.
+
+## Usage
 
 ### Write your experiment
 
