@@ -11,7 +11,7 @@ pip install -r requirements.txt
 
 ## Heroku Setup & Customization
 
-1. Clone this repository
+1. Create a new repository using this repository as a template (on github there is a green "Use this template" button at the top of the page).
 2. Create a Heroku account and install the [Heroku toolbelt](https://toolbelt.heroku.com/). Ensure that you're logged in correctly with `heroku auth:whoami`
 3. Create a new app and add a Postgres database
 ```
