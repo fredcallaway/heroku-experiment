@@ -86,11 +86,6 @@ async function initializeExperiment() {
   // Test trials //
   /////////////////
 
-  var sorting = {
-    type: 'free-sort',
-    stimuli: ["static/images/blue.png", "static/images/orange.png"]
-  }
-
   var stimuli = [
     {
       stimulus: "static/images/blue.png",
@@ -120,29 +115,17 @@ async function initializeExperiment() {
     timeline: _.flatten(trials.map(trial => [fixation, trial]))
   };
 
-  function getAverageResponseTime() {
-
-    var trials = jsPsych.data.getTrialsOfType('html-keyboard-response');
-
-    var sum_rt = 0;
-    var valid_trial_count = 0;
-    for (var i = 0; i < trials.length; i++) {
-      if (trials[i].response == 'go' && trials[i].rt > -1) {
-        sum_rt += trials[i].rt;
-        valid_trial_count++;
-      }
-    }
-    return Math.floor(sum_rt / valid_trial_count);
-  }
 
   var debrief_block = {
     type: "html-keyboard-response",
     // We don't want to
     stimulus() {
-      return `
-        Your average response time was ${getAverageResponseTime()}.
+      return markdown(`
+        # Experiment complete
+
+        You did so good. Wow. Great job!
         Press any key to complete the experiment. Thanks!
-      `
+      `)
     }
   };
 
