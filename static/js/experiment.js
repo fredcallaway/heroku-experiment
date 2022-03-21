@@ -1,3 +1,4 @@
+const PROLIFIC_CODE = null  // set this to the prolific completion code to run in prolific mode
 
 async function initializeExperiment() {
   LOG_DEBUG('initializeExperiment');

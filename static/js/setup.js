@@ -7,12 +7,6 @@ var searchParams = new URLSearchParams(location.search)
 LOCAL = false;
 DEBUG = searchParams.get('debug') == 'true';
 
-PROLIFIC = true
-// PROLIFIC = (searchParams.get('prolific') == 'true') || 
-//   (searchParams.get('hitId') == null) || 
-//   (searchParams.get('hitId') == 'prolific');
-
-
 if (mode === "demo") {
   LOCAL = true;
   condition = "0";
@@ -115,7 +109,7 @@ completeHIT = async function() {
   });
   $('#jspsych-target').empty()
   console.log('completeHIT')
-  if (PROLIFIC) {
+  if (PROLIFIC_CODE != null) {
     $("#load-icon").remove()
     $(window).off("beforeunload");
     $('body').html(`
