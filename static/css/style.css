@@ -1,4 +1,10 @@
-
+#jspsych-html-button-response-stimulus {
+  max-width: 700px;
+}
+#jspsych-html-button-response-btngroup {
+  width: 700px;
+  text-align: center;
+}
 #timer {
   font-size: 20pt;
   font-weight: bold;
