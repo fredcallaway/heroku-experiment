@@ -4,6 +4,7 @@ from flask import Blueprint, render_template, request, jsonify, Response, abort,
 from jinja2 import TemplateNotFound
 from functools import wraps
 from sqlalchemy import or_
+from traceback import format_exc
 
 from psiturk.psiturk_config import PsiturkConfig
 from psiturk.experiment_errors import ExperimentError, InvalidUsage
@@ -13,6 +14,8 @@ from psiturk.user_utils import PsiTurkAuthorization, nocache
 from psiturk.db import db_session, init_db
 from psiturk.models import Participant
 from json import dumps, loads
+from sqlalchemy import exc
+import datetime
 
 # load the configuration options
 config = PsiturkConfig()
@@ -21,6 +24,26 @@ myauth = PsiTurkAuthorization(config)  # if you want to add a password protect r
 
 # explore the Blueprint
 custom_code = Blueprint('custom_code', __name__, template_folder='templates', static_folder='static')
+
+# Status codes
+NOT_ACCEPTED = 0
+ALLOCATED = 1
+STARTED = 2
+COMPLETED = 3
+SUBMITTED = 4
+CREDITED = 5
+QUITEARLY = 6
+BONUSED = 7
+BAD = 8
+
+@custom_code.route('/')
+def demo():
+    data = {
+        key: "{{ " + key + " }}"
+        for key in ['uniqueId', 'condition', 'counterbalance', 'adServerLoc', 'mode']
+    }
+    data['mode'] = 'demo'
+    return render_template('exp.html', **data)
 
 
 def get_participants(codeversion):
@@ -67,6 +90,25 @@ def download_datafiles(codeversion, name):
     return response
 
 
+@custom_code.route('/complete_exp', methods=['POST'])
+def complete_exp():
+    if not 'uniqueId' in request.form:
+        raise ExperimentError('improper_inputs')
+    unique_id = request.form['uniqueId']
+
+    current_app.logger.info("completed experimente")
+    try:
+        user = Participant.query.\
+            filter(Participant.uniqueid == unique_id).one()
+        user.status = COMPLETED
+        user.endhit = datetime.datetime.now()
+        db_session.add(user)
+        db_session.commit()
+        resp = {"status": "success"}
+    except exc.SQLAlchemyError:
+        current_app.logger.error("DB error: Unique user not found.")
+        resp = {"status": "error, uniqueId not found"}
+    return jsonify(**resp)
 
 
 #----------------------------------------------
