@@ -1,6 +1,6 @@
-# Psirokuturk
+# Heroku experiment template
 
-A starter pack for running online experiments with Psiturk on Heroku.
+A starter pack for running online experiments on Heroku using Psiturk or Prolific.
 
 ## Requirements
 
