@@ -6,8 +6,7 @@ var searchParams = new URLSearchParams(location.search)
 
 LOCAL = false;
 DEBUG = searchParams.get('debug') == 'true';
-
-if (mode === "demo") {
+if (mode === "demo" || mode == "{{ mode }}") {
   LOCAL = true;
   condition = "0";
   counterbalance = "0";
