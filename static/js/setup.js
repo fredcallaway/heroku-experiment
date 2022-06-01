@@ -194,7 +194,7 @@ handleError = function(e) {
   }
   psiturk.recordUnstructuredData('error', msg);
   message = `<pre>
-    Prolific Id: ${(typeof workerId !== "undefined" && workerId !== null ? workerId[0] : 'N/A')}
+    Prolific Id: ${(typeof workerId !== "undefined" && workerId !== null ? workerId : 'N/A')}
     ${msg}
   </pre>`;
   
