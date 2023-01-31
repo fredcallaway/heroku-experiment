@@ -29,7 +29,7 @@ mock==3.0.5
 more-itertools==8.7.0
 packaging==20.9
 pluggy==0.13.1
-PsiTurk==2.3.11
+PsiTurk==3.2.1
 psutil==5.6.7
 psycopg2==2.8.4
 py==1.10.0
