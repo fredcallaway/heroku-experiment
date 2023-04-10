@@ -129,6 +129,10 @@ completeHIT = async function() {
   }
 }
 
+function setTimeoutPromise(ms) {
+  return new Promise((res) => setTimeout(res, ms));
+}
+
 submitHit = function() {
   var promptResubmit, triesLeft;
   console.log('submitHit');
@@ -147,6 +151,7 @@ submitHit = function() {
   `);
   $("#submit-error").hide()
   triesLeft = 3;
+  let timeoutMS = 1000;
   promptResubmit = function() {
     console.log('promptResubmit');
     if (triesLeft) {
@@ -154,7 +159,8 @@ submitHit = function() {
       $("#submit-error").show()
       $("#ntry").html(triesLeft)
       triesLeft -= 1;
-      return saveData().catch(promptResubmit);
+      timeoutMS *= 1.5; // Exponential backoff.
+      return setTimeoutPromise(timeoutMS).then(saveData).catch(promptResubmit);
     } else {
       console.log('GIVE UP');
       $('#jspsych-target').html(`
