@@ -15,7 +15,7 @@ You must have Python 3 and a Unix-based OS (Linux or Mac).
     source env/bin/activate   
     pip install -r requirements.txt
 ```
-3. Create a Heroku account and install the [Heroku toolbelt](https://toolbelt.heroku.com/). Ensure that you're logged in correctly with `heroku auth:whoami`
+3. Create a Heroku account and install the [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli). Ensure that you're logged in correctly with `heroku auth:whoami`
 4. Create a new app and add a Postgres database
 ```
     heroku create YOUR_APP_NAME --buildpack heroku/python
