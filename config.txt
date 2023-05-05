@@ -1,3 +1,25 @@
+[Task Parameters]
+experiment_code_version = 1.0
+num_conds = 1
+num_counters = 1
+
+
+[Server Parameters]
+host = 0.0.0.0
+port = 22362
+logfile = server.log
+threads = 2
+cutoff_time = 30
+loglevel = 2
+debug = true
+login_username = user
+login_pw = pw
+secret_key = 'bodacious secret key'
+
+# --- everything below this line is only relevant if you are using MTurk (via psiturk) ---
+
+adserver_revproxy_host = bodacious_app_name.herokuapp.com
+
 [HIT Configuration]
 title = Example JsPsych Psiturk Experiment
 description = For educational purposes
@@ -7,7 +29,7 @@ us_only = true
 approve_requirement = 95
 contact_email_on_error = email@bodacious.edu
 ad_group = Default psiTurk
-organization_name = Bodacious University
+organization_name = bodacious university
 browser_exclude_rule = MSIE, mobile, tablet
 allow_repeats = false
 
@@ -15,23 +37,6 @@ allow_repeats = false
 database_url = sqlite:///participants.db
 table_name = participants
 
-[Server Parameters]
-host = 0.0.0.0
-port = 22362
-cutoff_time = 30
-logfile = server.log
-loglevel = 2
-debug = true
-login_username = user
-login_pw = pw
-threads = 2
-secret_key = 'this is my secret key which is hard to guess, i should change this'
-adserver_revproxy_host = fredtest1.herokuapp.com
-
-[Task Parameters]
-experiment_code_version = 1.0
-num_conds = 1
-num_counters = 1
 
 [Shell Parameters]
 launch_in_sandbox_mode = true
@@ -42,4 +47,4 @@ bonus_message = "Thanks for participating!"
 #   https://<host>:<port>/ad
 
 use_psiturk_ad_server = false
-ad_location = https://fredtest1.herokuapp.com/pub
+ad_location = https://bodacious_app_name.herokuapp.com/pub

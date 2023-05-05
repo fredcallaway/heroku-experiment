@@ -8,21 +8,20 @@ LOCAL = false;
 DEBUG = searchParams.get('debug') == 'true';
 if (mode === "demo" || mode == "{{ mode }}") {
   LOCAL = true;
-  condition = "0";
-  counterbalance = "0";
+  let condition = searchParams.get('condition') ?? "0";
+  let counterbalance = searchParams.get('counterbalance') ?? "0";
 }
 
+CONDITION = parseInt(condition);
+COUNTERBALANCE = parseInt(counterbalance);
+
 if (DEBUG) {
-  console.log("DEBUG  MODE");
-  CONDITION = 0;
-  COUNTERBALANCE = 0
+  console.log("DEBUG MODE");
   LOG_DEBUG = function(...args) {
     return console.log(...args);
   };
 } else {
   console.log("NORMAL MODE");
-  CONDITION = parseInt(condition);
-  COUNTERBALANCE = parseInt(counterbalance);
   LOG_DEBUG = function(...args) {
     return null;
   };

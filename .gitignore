@@ -1,9 +1,3 @@
-.psiturk_history
-server.log
-data
-participants.db
-.database_url
-
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -141,3 +135,12 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+
+
+# this project
+.psiturk_history
+server.log
+data
+participants.db
+.database_url
+bonus.csv
