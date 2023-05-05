@@ -1,6 +1,8 @@
 .psiturk_history
 server.log
-data/raw
+data
+participants.db
+.database_url
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -139,4 +141,3 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
-participants.db
