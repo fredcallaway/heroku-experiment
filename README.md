@@ -34,10 +34,10 @@ Run `make dev` in a terminal. Then visit [http://localhost:22362?debug=true](htt
 
 Make sure you're logged into the correct Heroku account using the Heroku CLI (use `heroku auth` to see useful commands).
 
-Create a new app and add a Postgres database. **Note: these commands must be run from the project directory** (the one containing this README.md).
+Create a new app and add a Postgres database. **Note: these commands must be run from the project directory** (the one containing this README.md). You should probably change the name of your app to something less silly.
 ```
-heroku create fredtest --buildpack heroku/python
-heroku git:remote -a fredtest
+heroku create dizzydangdoozle --buildpack heroku/python
+heroku git:remote -a dizzydangdoozle
 heroku addons:create heroku-postgresql
 ```
 You can confirm that the heroku site has been created with the `heroku domains`, which will print the domain of your shiny new website!
@@ -58,6 +58,12 @@ This makes heroku build your app, which can take a minute or so. Then your websi
 - Edit, refresh, edit, refresh, edit, refresh....
     - TIP: to make this slightly less painful, you can add e.g. `&skip=3` to skip the first three entries in the timeline.
 
+Note: **data will not be saved when testing locally**. If you want to save data while debugging, you will need to run the experiment on heroku andpass the relevant URL parameters, for example:
+
+https://dizzydangdoozle-4cd6ae16d401.herokuapp.com/exp?mode=live&workerId=debug123&hitId=prolific&assignmentId=debug123
+
+If you don't want to overwrite the previously saved debug data, you have to change the workerId or assignmentId
+
 ## Posting your study
 
 First, update codeversion in config.txt. This is how the database knows to keep different versions of your study separate. What you do next depends on the recruitment service.
@@ -66,7 +72,7 @@ First, update codeversion in config.txt. This is how the database knows to keep 
 
 Create the study with Prolific's web interface. 
 
-1. Set the URL to. `https://<YOUR_APP_NAME>.herokuapp.com/consent?mode=live&workerId={{%PROLIFIC_PID%}}&hitId=prolific&assignmentId={{%SESSION_ID%}}`. Make sure to replace `<YOUR_APP_NAME>` in the link with your app name!
+1. Set the URL to. `https://<YOUR_APP_DOMAIN>.herokuapp.com/consent?mode=live&workerId={{%PROLIFIC_PID%}}&hitId=prolific&assignmentId={{%SESSION_ID%}}`. Make sure to replace `<YOUR_APP_DOMAIN>` in the link with the current domain, which you can see with the `heroku domains` command.
 2. Make sure "I'll use URL parameters" is checked.
 3. Select "I'll redirect them using a URL". Copy the code and set it as `PROLIFIC_CODE` in experiment.js, e.g. `const PROLIFIC_CODE = "6A5FDC7A"`.
 4. As always, do a dry run with Prolific's "preview" mechanism before actually posting the study. I also recommend running only a couple people on your first go in case there are unforseen issues.
