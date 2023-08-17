@@ -58,11 +58,11 @@ This makes heroku build your app, which can take a minute or so. Then your websi
 - Edit, refresh, edit, refresh, edit, refresh....
     - TIP: to make this slightly less painful, you can add e.g. `&skip=3` to skip the first three entries in the timeline.
 
-Note: **data will not be saved when testing locally**. If you want to save data while debugging, you will need to run the experiment on heroku andpass the relevant URL parameters, for example:
+Note: **data will not be saved when testing locally**. If you want to save data while debugging, you will need to run the experiment on heroku and pass the relevant URL parameters, for example:
 
 https://dizzydangdoozle-4cd6ae16d401.herokuapp.com/exp?mode=live&workerId=debug123&hitId=prolific&assignmentId=debug123
 
-If you don't want to overwrite the previously saved debug data, you have to change the workerId or assignmentId
+If you don't want to overwrite the previously saved debug data, you have to change the workerId or assignmentId.
 
 ## Posting your study
 
