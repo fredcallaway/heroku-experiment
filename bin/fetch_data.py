@@ -6,24 +6,6 @@ from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 import hashlib
 import json
 
-# set environment parameters so that we use the remote database
-
-def get_database():
-    if os.path.isfile('.database_url'):
-        with open('.database_url') as f:
-            return f.read()
-    else:
-        cmd = "heroku config:get DATABASE_URL"
-        url = subprocess.check_output(cmd, shell=True).strip().decode('ascii')
-        with open('.database_url', 'w') as f:
-            f.write(url)
-            return url
-
-env = os.environ
-env["PORT"] = ""
-env["ON_CLOUD"] = "1"
-env["DATABASE_URL"] = get_database()
-
 from psiturk.models import Participant  # must be imported after setting params
 
 class Anonymizer(object):
@@ -143,8 +125,28 @@ def reformat(version):
         identifiers = pd.Series(anonymize.mapping, name='wid')
         identifiers.to_csv(f'data/raw/{version}/identifiers.csv', index_label='workerid')
 
+
+def get_database():
+    if os.path.isfile('.database_url'):
+        with open('.database_url') as f:
+            return f.read()
+    else:
+        cmd = "heroku config:get DATABASE_URL"
+        url = subprocess.check_output(cmd, shell=True).strip().decode('ascii')
+        with open('.database_url', 'w') as f:
+            f.write(url)
+            return url
+
+def set_env_vars():
+    # set environment parameters so that we use the remote database
+    env = os.environ
+    env["PORT"] = ""
+    env["ON_CLOUD"] = "1"
+    env["DATABASE_URL"] = get_database()
+
 def main(version, debug):
-    # write_csvs(version, debug)
+    set_env_vars()
+    write_csvs(version, debug)
     reformat(version)
 
 if __name__ == "__main__":
