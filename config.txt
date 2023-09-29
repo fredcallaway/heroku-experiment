@@ -3,6 +3,15 @@ experiment_code_version = 1.0
 num_conds = 1
 num_counters = 1
 
+[Prolific]
+name = Example JsPsych Psiturk Experiment
+reward = 3
+total_available_places = 30
+estimated_completion_time = 20
+description =
+    In this study, you will do some stuff.
+
+    *Markdown* is supported here.
 
 [Server Parameters]
 host = 0.0.0.0
@@ -15,10 +24,13 @@ debug = true
 login_username = user
 login_pw = pw
 secret_key = 'bodacious secret key'
+adserver_revproxy_host = bodacious_app_name.herokuapp.com
+
+[Database Parameters]
+database_url = sqlite:///participants.db
+table_name = participants
 
 # --- everything below this line is only relevant if you are using MTurk (via psiturk) ---
-
-adserver_revproxy_host = bodacious_app_name.herokuapp.com
 
 [HIT Configuration]
 title = Example JsPsych Psiturk Experiment
@@ -32,11 +44,6 @@ ad_group = Default psiTurk
 organization_name = bodacious university
 browser_exclude_rule = MSIE, mobile, tablet
 allow_repeats = false
-
-[Database Parameters]
-database_url = sqlite:///participants.db
-table_name = participants
-
 
 [Shell Parameters]
 launch_in_sandbox_mode = true
