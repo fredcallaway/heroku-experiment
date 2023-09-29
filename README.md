@@ -76,6 +76,7 @@ We also provide an alpha-release CLI for Prolific, using the Prolific API. Run `
 - `approve_and_bonus` does what you think it does using the bonus.csv file produced by `bin/fetch_data.py`
 - `post_duplicate` posts a copy of your last study (as if you had used Prolific's "duplicate study" feature) with an updated name. You can update the pay and number of places in config.txt. It won't actually post the study without you confirming (after printing a link to preview it on Prolific).
 
+You'll need to install two additional dependencies for this script: `pip install markdown fire`
 
 ### MTurk
 
