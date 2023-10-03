@@ -7,6 +7,7 @@ import hashlib
 import json
 
 from psiturk.models import Participant  # must be imported after setting params
+from sqlalchemy.exc import OperationalError
 
 class Anonymizer(object):
     def __init__(self):
@@ -146,7 +147,11 @@ def set_env_vars():
 
 def main(version, debug):
     set_env_vars()
-    write_csvs(version, debug)
+    try:
+        write_csvs(version, debug)
+    except sqlalchemy.exc.OperationalError:
+        print("Cannot access database. Resetting the cached database url. Please try again.")
+        os.remove('.database_url')
     reformat(version)
 
 if __name__ == "__main__":
