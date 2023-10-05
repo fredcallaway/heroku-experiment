@@ -106,6 +106,12 @@ If you don't want to overwrite the previously saved debug data, you have to chan
 
 Additionally, by default `bin/fetch_data.py` will not download data with "debug" in the workerId or assignmentId. You can pass the `--debug` flag to disable this behavior and download all data.
 
+## FAQ
+
+_Can I check how many participants there are without downloading the full dataset?_
+
+Yes. Use e.g. `heroku pg:psql -c "select count(*) from participants where codeversion = 'v1'"`. You can also open an interactive SQL terminal with just `heroku pg:psql`. Another useful query is `select workerid,codeversion,cond,beginhit,endhit from participants order by beginhit desc;`
+
 ## Contributors
 
 - Fred Callaway
