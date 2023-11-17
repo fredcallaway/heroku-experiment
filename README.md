@@ -106,6 +106,10 @@ If you don't want to overwrite the previously saved debug data, you have to chan
 
 Additionally, by default `bin/fetch_data.py` will not download data with "debug" in the workerId or assignmentId. You can pass the `--debug` flag to disable this behavior and download all data.
 
+## Posting static versions
+
+It is often useful to have a permanent link to different versions of the experiment. This is easy to do if you have your own personal website that you can rsync to. First set the relevant parameters in bin/post_static. Then you can run e.g. `bin/post_static v1`.
+
 ## FAQ
 
 _Can I check how many participants there are without downloading the full dataset?_

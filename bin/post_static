@@ -1,0 +1,18 @@
+#!/bin/bash
+# an existing folder on your website, the rsync destination
+SITE=simcoe:/simcoe/home/fredc/www.fredcallaway.com/docs/expdemo
+# name of this experiment
+BASENAME=template
+# command line argument gives a version identifier
+VERSION=${1:-v0}
+# for convenience, the URL corresponding to the SITE variable, to print the location
+WEB=www.fredcallaway.com/expdemo
+
+if [[ $SITE = "TODO" ]]; then
+    echo $VERSION
+    echo set the SITE variable in this script to a folder on your personal website
+    exit 1
+else
+    rsync -av --exclude data --exclude .git --exclude env ./ $SITE/$BASENAME-$VERSION
+    echo $WEB/$BASENAME-$VERSION
+fi
