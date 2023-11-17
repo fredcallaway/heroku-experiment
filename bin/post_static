@@ -1,12 +1,12 @@
 #!/bin/bash
 # an existing folder on your website, the rsync destination
-SITE=simcoe:/simcoe/home/fredc/www.fredcallaway.com/docs/expdemo
+SITE=TODO
 # name of this experiment
 BASENAME=template
 # command line argument gives a version identifier
 VERSION=${1:-v0}
 # for convenience, the URL corresponding to the SITE variable, to print the location
-WEB=www.fredcallaway.com/expdemo
+WEB=TODO
 
 if [[ $SITE = "TODO" ]]; then
     echo $VERSION
