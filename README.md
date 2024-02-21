@@ -24,11 +24,12 @@ pip install -r requirements.txt
 pip install pandas
 ```
 
+You can then see the experiment by running `make dev` and opening the printed link (cmd-click). By default the experiment will be served at <http://localhost:22362>. You can change the port number in config.txt (e.g., to allow previewing multiple experiments at once).
+
 ### Update university- and app-specific information
 
 Do a search for "bodacious" to find places where you should change info. Note that you only need to worry about ad.html and config.txt if you're running on MTurk. Put your IRB-approved consent form in templates/consent.html.
 
-Run `make dev` in a terminal. Then visit [http://localhost:22362?debug=true](http://localhost:22362). The "22362" is set in config.txt and you can change that value if you like (e.g., to allow previewing multiple experiments at once).
 
 ### Deploy to Heroku
 
@@ -55,8 +56,11 @@ This makes heroku build your app, which can take a minute or so. Then your websi
 - [Create custom jsPsych plugins](https://www.jspsych.org/overview/plugins/#creating-a-new-plugin) if needed.
 - If you have multiple conditions, use the CONDITION variable. The number of conditions is set in config.txt. You can manually specify the condition while debugging by adding `&condition=1` to the URL.
 - Add your new plugins and any other dependencies to templates/exp.html.
+- Run `make dev` to preview your experiment.
 - Edit, refresh, edit, refresh, edit, refresh....
     - TIP: to make this slightly less painful, you can add e.g. `&skip=3` to skip the first three entries in the timeline.
+
+Note: **by default, data will not be saved when running locally**. If you want to save data while debugging, you can use the /test route, for example <http://localhost:22362/test>. This will fill in the fields necessary to store your data in the local participants.db sqlite database. You'll see the randomly generated workerid (something like debug58523) in the URL bar.
 
 ## Posting your study
 
