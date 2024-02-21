@@ -109,7 +109,6 @@ class Prolific(object):
         studies = self.studies(project_id)
         return [s for s in studies
             if s['status'] != 'UNPUBLISHED'
-            and s['internal_name'].startswith('graph-nav')
         ][-1]['id']
 
     @cache
