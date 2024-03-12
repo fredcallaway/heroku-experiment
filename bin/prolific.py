@@ -122,12 +122,15 @@ class Prolific(object):
     def approve_all(self, study_id, ignore_code=False):
         to_approve = []
         bad_code = []
-        completion_code = self.get(f'/studies/{study_id}/')['completion_code']
+        completion_codes = [x['code']
+            for x in self.get(f'/studies/{study_id}/')['completion_codes']
+            if x['code_type'] == "COMPLETED"
+        ]
 
         for sub in self.submissions(study_id):
             if sub['status'] != 'AWAITING REVIEW':
                 continue
-            if ignore_code or sub['study_code'] == completion_code:
+            if ignore_code or sub['study_code'] in completion_codes:
                 to_approve.append(sub["participant_id"])
             else:
                 bad_code.append(sub["participant_id"])
@@ -143,7 +146,7 @@ class Prolific(object):
             })
             print(f'Approved {len(to_approve)} submissions')
         else:
-            print('All submissions have already been approved')
+            print('No submissions to approve')
 
 
     def assign_bonuses(self, study_id, bonuses):
