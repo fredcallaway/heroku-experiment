@@ -1,4 +1,4 @@
-ERROR_EMAIL = 'youremail@domain.com'
+ERROR_EMAIL = 'youremail@bodacious.edu'
 // this defines 6 conditions (a 2x3 design)
 // make sure to update num_conds in config.txt to reflect any changes you make here
 const PARAMS = conditionParameters(CONDITION, {

@@ -1,3 +1,10 @@
+[Task Parameters]
+experiment_code_version = v1.0
+# this number determines how many values the CONDITION variable can take
+num_conds = 6
+# don't change this
+num_counters = 1
+
 [Database Parameters]
 database_url = sqlite:///participants.db
 table_name = participants
@@ -12,13 +19,6 @@ description =
     Describe your study here
 
     You can use *Markdown* formatting.
-
-[Task Parameters]
-experiment_code_version = v1.0
-# this number determines how many values the CONDITION variable can take
-num_conds = 6
-# don't change this
-num_counters = 1
 
 [Server Parameters]
 host = 0.0.0.0
