@@ -77,7 +77,7 @@ function eventPromise(predicate) {
     match = predicate
     predicate = (info) => info.event.startsWith(match)
   }
-  let promise = make_promise()
+  let promise = makePromise()
   let func = (info) => {
     if (predicate(info)) {
       logEvent('eventPromise.resolve', {match})

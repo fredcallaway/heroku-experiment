@@ -78,7 +78,7 @@ class Instructions {
     .filter(f => f.startsWith('stage'))
     .map(f => this[f])
 
-    this.completed = make_promise()
+    this.completed = makePromise()
 
   }
 
@@ -99,7 +99,7 @@ class Instructions {
 
   sleep(ms) {
     // this allows us to cancel sleeps when the user flips to a new page
-    this._sleep = make_promise()
+    this._sleep = makePromise()
     sleep(ms).then(() => this._sleep.resolve())
     return this._sleep
   }
@@ -254,7 +254,7 @@ class ExampleInstructions extends Instructions {
     let question = 'Are you going to refresh the page after completing the instructions?'
     let radio = radio_buttons(this.prompt, question, ['yes', 'no'])
     let post = $('<div>').appendTo(this.prompt)
-    let no = make_promise()
+    let no = makePromise()
     let done = false
     radio.click((val) => {
       if (val == 'yes') {

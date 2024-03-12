@@ -40,7 +40,7 @@ class Button extends Input {
     .text(text)
     .appendTo(this.div)
 
-    this.clicked = make_promise()
+    this.clicked = makePromise()
     this.button.click(() => {
       this.button.prop('disabled', true)
       logEvent('input.button.click', {name: this.name, text})
@@ -118,7 +118,7 @@ class RadioButtons extends Input {
   }
 
   promise() {
-    let promise = make_promise()
+    let promise = makePromise()
     this.buttons().click(() => promise.resolve(this.val()))
     return promise
   }

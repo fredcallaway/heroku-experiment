@@ -52,7 +52,7 @@ const EXAMPLE_SURVEY = {
 class SurveyTrial {
   constructor(json) {
     this.survey = new Survey.Model(EXAMPLE_SURVEY);
-    this.results = make_promise()
+    this.results = makePromise()
     this.survey.onComplete.add((sender) => this.results.resolve(sender.data));
 
     // Enable markdown in questions
