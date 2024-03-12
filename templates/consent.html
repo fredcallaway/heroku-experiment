@@ -14,9 +14,9 @@ describe what people can do if an error comes up, etc...
     <link rel="stylesheet" href="/static/css/bootstrap.min.css" type="text/css" />
     <link rel="stylesheet" href="/static/css/style.css" type="text/css" />
     <script type="text/javascript">
-      function onexit() {
-          self.close(); // no harm, no foul here
-      }
+    function onexit() {
+      self.close();
+    }
     </script>
   </head>
   <body>
@@ -26,30 +26,69 @@ describe what people can do if an error comes up, etc...
         <hr />
         <div class="legal well">
 
-            TODO: PUT YOUR CONSENT FORM HERE.
+          <p>
+            The purpose of this research is to examine how people break
+            down complex problems into smaller pieces. The study will
+            involve arranging blocks to match specified shapes.
+            It will take approximately 30 minutes to
+            complete, and you will receive $5.
+          </p>
+          <p>
+            There are no anticipated risks associated with participating in
+            this study. The effects of participating should be comparable to
+            those you would ordinarily experience from viewing a computer
+            monitor and using a mouse or keyboard for a similar amount of
+            time.
+            <!-- At the end of the study, we will provide an explanation of
+            the questions that motivate this line of research and will
+            describe the potential implications. -->
+          </p>
+          <p>
+            Your participation in this study is completely voluntary and you
+            may refuse to participate or you may choose to withdraw at any
+            time without penalty or loss of benefits to which you are
+            otherwise entitled. Your participation in this study will remain
+            confidential. No personally identifiable information will be
+            associated with your data.
+            <!-- Also, all analyses of the data will be
+            averaged across all the participants, so your individual responses
+            will never be specifically analyzed. -->
+          </p>
+          <p>
+            If you have questions or concerns about your participation or
+            payment or want to request a summary of research findings, please
+            contact the researcher: Fred Callaway, fcallaway@g.harvard.edu. For
+            any other problems related to this study, you may also contact the
+            faculty member supervising this work: Fiery Cushman,
+            cushman@fas.harvard.edu. For questions, concerns, suggestions, or
+            complaints that have not been or cannot be addressed by the
+            researcher, or to report research-related harm, please contact the
+            Committee on the Use of Human Subjects in Research at Harvard
+            University. Phone: 617-496-2847. Email: cuhs@fas.harvard.edu.
+            Please print or save a copy of this form for your records.
+          </p>
+          <p>
+          Agreement: The nature and purpose of this research have been
+          sufficiently explained and I agree to participate in this study. I
+          understand that I am free to withdraw at any time without incurring
+          any penalty.
+        </p>
 
-<!--           <button type="button" class="btn btn-default btn-sm" onClick="window.print();">
-            <span class="glyphicon glyphicon-print"></span> Print a copy
-          </button> -->
-        </div>
+<!-- This line has to be here to prevent a psiturk error... {{ hitid }}&assignmentId={{ assignmentid }}&workerId={{ workerid }} -->
+      <center>
+        <button type="button" class="btn btn-primary btn-lg" 
+          onClick="window.location='/exp' + window.location.search">
+          <span class="glyphicon glyphicon-ok"></span> I agree
+        </button>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <button type="button" class="btn btn-danger btn-lg" onClick="onexit()">
+          <span class="glyphicon glyphicon-ban-circle"></span> No thanks, I do not want to do this study
+        </button>
+      </center>
 
-        <hr />
-        <h4>Do you understand and consent to these terms?</h4>
-        <br />
-
-        <center>
-          <button type="button" class="btn btn-primary btn-lg" onClick="window.location='/exp?hitId={{ hitid }}&assignmentId={{ assignmentid }}&workerId={{ workerid }}'">
-            <span class="glyphicon glyphicon-ok"></span> I agree
-          </button>
-          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-          <button type="button" class="btn btn-danger btn-lg" onClick="onexit()">
-            <span class="glyphicon glyphicon-ban-circle"></span> No thanks, I do not want to do this HIT
-          </button>
-        </center>
-
-      </div>
     </div>
+  </div>
   </body>
 </html>

@@ -144,3 +144,4 @@ data
 participants.db
 .database_url
 bonus.csv
+bin/.prolific_token

@@ -1,3 +1,6 @@
+serve:
+	python -m http.server -b localhost
+
 dev: export FLASK_ENV=development
 dev:
-	env/bin/python bin/herokuapp.py
+	python bin/herokuapp.py

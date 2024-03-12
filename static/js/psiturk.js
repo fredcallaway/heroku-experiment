@@ -318,7 +318,7 @@ var PsiTurk = function(uniqueId, adServerLoc, mode) {
     // To be fleshed out with backbone views in the future.
     var replaceBody = function(x) { $('body').html(x); };
 
-    self.showPage = _.compose(replaceBody, self.getPage);
+    self.showPage = _.flowRight(replaceBody, self.getPage);
 
     /* initialized local variables */
 

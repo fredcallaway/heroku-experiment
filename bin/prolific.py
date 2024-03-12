@@ -10,18 +10,38 @@ import random
 from fire import Fire
 from functools import cache, cached_property
 
+def find_token():
+    if os.path.isfile(".prolific_token"):
+        with open('.prolific_token') as f:
+            token = f.read().strip()
+            if token:
+                return token
+    token = os.getenv('PROLIFIC_TOKEN')
+    if token:
+        return token
+    token = input('PROLIFIC_TOKEN environment variable not found. Please enter it here: ')
+    if not token.strip():
+        print("Exiting.")
+        exit(1)
+    if input("Would you like to save it for future use? [y/N]") == "y":
+        with open('.prolific_token', 'w') as f:
+            f.write(token)
+        with open(".gitignore", "a") as f:
+            f.write('\n.prolific_token')
+        print("Saved to .prolific_token — we added this file to your .gitignore as well.")
+        return token
+
 
 class Prolific(object):
     """Prolific API wrapper"""
     def __init__(self, token=None):
         super(Prolific, self).__init__()
         if token is None:
-            token = os.getenv('PROLIFIC_TOKEN')
-            if not token:
-                raise ValueError('You must provide a token or set the PROLIFIC_TOKEN environment variable.')
+            token = find_token()
+        if not token:
+            raise ValueError('You must provide a token, create a .prolific_token file, or set a PROLIFIC_TOKEN environment variable.')
 
         self.token = token
-
     def request(self, method, url, **kws):
         if url.startswith('/'):
             url = 'https://api.prolific.co/api/v1' + url
@@ -74,9 +94,17 @@ class Prolific(object):
                 v = markdown(v)
             kws[k] = v
 
+        if int(kws['reward']) > 1000:
+            reward = f"${kws['reward'] / 100:.2f}"
+            confirm = input(f'High reward detected: {reward} per person. Is that right? [y/N] ')
+            if confirm != 'y':
+                print('NOT posting')
+                return
+
         new = self.patch(f'/studies/{new_id}/', kws)
 
         new['cost'] = f"${new['total_cost'] / 100:.2f}"
+
         for k in ['name', 'internal_name', 'description', 'reward', 'total_available_places', 'cost']:
             print(k + ': ' + str(new[k]))
         preview_link = new['external_study_url'].replace(
@@ -84,16 +112,19 @@ class Prolific(object):
         ).replace('{{%SESSION_ID%}}', 'debug').replace('{{%STUDY_ID%}}', 'debug')
         print(preview_link)
 
-        y = input(f'Go ahead? [y/N] ')
-        if y.lower() == 'y':
+        confirm = input(f'Go ahead? [y/N] ')
+        if confirm.lower() == 'y' and new['total_cost'] > 20000:
+            confirm = input("EXPENSIVE! Just to be sure, you want to spend", new['total_cost'], 'correct? [y/N] ')
+        if confirm.lower() == 'y':
+
             self.post(f'/studies/{new_id}/transition/', {
                 "action": "PUBLISH"
             })
             print('Posted! See submssisions at:')
             print(f'https://app.prolific.co/researcher/workspaces/studies/{new_id}/submissions')
         else:
-            y = input('NOT posting. Keep draft? [Y/n] ')
-            if y.lower() == 'n':
+            confirm = input('NOT posting. Keep draft? [Y/n] ')
+            if confirm.lower() == 'n':
                 self.delete('/studies/' + new['id'])
             else:
                 print(f'https://app.prolific.co/researcher/workspaces/studies/{new_id}')
@@ -232,7 +263,10 @@ def generate_internal_name():
     c = configparser.ConfigParser()
     c.read('config.txt')
     version = c["Task Parameters"]["experiment_code_version"]
-    project_name = c["Server Parameters"]["adserver_revproxy_host"].split('.')[0]
+    try:
+        project_name = c["Prolific"]["project_name"]
+    except:
+        project_name = c["Prolific"]["name"]
     sha = subprocess.getoutput('git rev-parse HEAD')[:8]
     return ' '.join([project_name, version, sha])
 
@@ -249,6 +283,13 @@ class CLI(object):
         import pandas as pd
         bonuses = dict(pd.read_csv('bonus.csv', header=None).set_index(0)[1])
         self._prolific.assign_bonuses(self._study_id, bonuses)
+
+    def approve(self):
+        """Approve all submissions of the last study.
+
+        The "last" study refers to the most recently posted study within your project
+        """
+        self._prolific.approve_all(self._study_id)
 
     def post_duplicate(self):
         """Post a duplicate of the last study using current fields in config.txt"""
@@ -282,32 +323,13 @@ class CLI(object):
         """Print the link to the submissions page for the most recently posted study"""
         return f"https://app.prolific.co/researcher/workspaces/studies/{self._study_id}/submissions"
 
-
-    @cached_property
-    def _token(self):
-        token = os.getenv('PROLIFIC_TOKEN')
-        if token:
-            return token
-        if os.path.isfile(".token"):
-            with open('.token') as f:
-                token = f.read()
-                if token:
-                    return token
-        token = input('PROLIFIC_TOKEN environment variable not found. Please enter it here: ')
-        if not token.strip():
-            print("Exiting.")
-            exit(1)
-        if input("Would you like to save it for future use? [y/N]") == "y":
-            with open('.token', 'w') as f:
-                f.write(token)
-            with open(".gitignore", "a") as f:
-                f.write('\n.token')
-            print("Saved to .token — we added this file to your .gitignore as well.")
-            return token
+    def total_cost(self):
+        """Print the total cost accumulated by studies in this project"""
+        return self._prolific.total_cost(self._project_id)
 
     @cached_property
     def _prolific(self):
-        return Prolific(self._token)
+        return Prolific()
 
     @cached_property
     def _project_id(self):
@@ -323,7 +345,7 @@ class CLI(object):
             )
             project_id = input("project id: ")
             if 'projects/' in project_id:
-                project_id = project_id.split('projects/')[1].strip()
+                project_id = project_id.split('projects/')[1].strip().split('/')[0]
 
             with open('.project_id', 'w') as f:
                 f.write(project_id)

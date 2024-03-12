@@ -14,8 +14,6 @@ from psiturk.user_utils import PsiTurkAuthorization, nocache
 from psiturk.db import db_session, init_db
 from psiturk.models import Participant
 from json import dumps, loads
-from sqlalchemy import exc
-import datetime
 
 # load the configuration options
 config = PsiturkConfig()
@@ -45,9 +43,12 @@ def demo():
     data['mode'] = 'demo'
     return render_template('exp.html', **data)
 
+
 @custom_code.route('/test')
 def test():
     import random
+    # uid = str(random.randint(0, 100000))
+    # uid = uid + ":" + uid
     args = {
         'hitId': 'debug',
         'assignmentId': 'debug',
@@ -55,6 +56,7 @@ def test():
         'mode': 'debug',
     }
     return redirect(url_for('start_exp', **args))
+
 
 def get_participants(codeversion):
     return (
@@ -116,7 +118,7 @@ def complete_exp():
         db_session.commit()
         resp = {"status": "success"}
     except exc.SQLAlchemyError:
-        current_app.logger.error("DB error: Unique user not found.")
+        app.logger.error("DB error: Unique user not found.")
         resp = {"status": "error, uniqueId not found"}
     return jsonify(**resp)
 
