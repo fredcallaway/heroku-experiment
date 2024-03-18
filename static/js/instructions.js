@@ -240,7 +240,7 @@ class ExampleInstructions extends Instructions {
   async stage_final() {
     // I suggest keeping something like this here to warn participants to not refresh
 
-    this.instruct(`
+    this.setPrompt(`
       In the rest of the experiment, yada yada
 
       <br><br>
