@@ -6,6 +6,7 @@ function nextInputName(type) {
     'Button': 'button',
     'TextBox': 'text',
     'RadioButton': 'radio',
+    'Slider': 'slider',
   }[type]
   let n = _input_counters[name] ?? 1
   _input_counters[name] = n + 1
@@ -132,6 +133,71 @@ class RadioButtons extends Input {
     this.buttons().click(() => {
       f(this.val())
     })
+  }
+}
+
+class Slider extends Input {
+  constructor({prompt='', min=0, max=100, step=1, value=50, name=undefined, leftLabel='', rightLabel=''}={}) {
+    super({name});
+
+    this.prompt = $("<p>")
+      .css('margin-top', 20)
+      .html(prompt)
+      .appendTo(this.div);
+
+    // Create container div to hold the slider and labels
+    this.sliderContainer = $('<div>').appendTo(this.div).css({
+      width: 500, marginBottom: 50,
+    });
+
+    this.slider = $('<input>')
+      .attr({
+        type: 'range',
+        min: min,
+        max: max,
+        step: step,
+        value: value,
+        id: this.name
+      })
+      .appendTo(this.sliderContainer)
+      .on('change', () => {
+        logEvent('input.slider.change', {name: this.name, value: this.slider.val()});
+      });
+
+    this.leftLabel = $('<label>')
+      .text(leftLabel)
+      .appendTo(this.sliderContainer)
+      .css({
+        // 'display': 'block',
+        float: 'left',
+        // 'text-align': 'center'
+      });
+
+    this.rightLabel = $('<label>')
+      .text(rightLabel)
+      .appendTo(this.sliderContainer)
+      .css({
+        float: 'right',
+        // 'display': 'block',
+        // 'text-align': 'center'
+      });
+
+  }
+
+  promise() {
+    let promise = makePromise();
+    this.slider.on('input', () => promise.resolve(this.val()));
+    return promise;
+  }
+
+  val() {
+    return this.slider.val();
+  }
+
+  change(callback) {
+    this.slider.on('input', () => {
+      callback(this.val());
+    });
   }
 }
 
