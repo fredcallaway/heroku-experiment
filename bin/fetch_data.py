@@ -39,13 +39,15 @@ def pick(obj, keys):
     return {k: obj.get(k, None) for k in keys}
 
 import csv
-def write_csv(file, records):
-    with open(file, mode='w', newline='') as file:
-        fieldnames = records[0].keys()
-        writer = csv.DictWriter(file, fieldnames=fieldnames)
-        writer.writeheader()
-        for record in records:
-            writer.writerow(record)
+def write_csv(file, data, header=True):
+    keys = set().union(*(d.keys() for d in data))
+
+    with open(file, 'w', newline='') as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=keys)
+        if header:
+            writer.writeheader()
+        for row in data:
+            writer.writerow(row)
 
 def write_data(version, mode):
     anonymize = Anonymizer(enabled = mode == 'live')
@@ -71,6 +73,7 @@ def write_data(version, mode):
     participants = []
 
     os.makedirs(f'data/raw/{version}/events/', exist_ok=True)
+    bonus = {}
     for p in ps:
         if p.datastring is None:
             continue
@@ -78,21 +81,25 @@ def write_data(version, mode):
             datastring = json.loads(p.datastring)
         except:
             import IPython, time; IPython.embed(); time.sleep(0.5)
-        meta = pick(datastring, metakeys)
-        meta['wid'] = anonymize(p.workerid)
 
-        participants.append(meta)
-
-        # datastring['eventdata']
-        trialdata = [d['trialdata'] for d in datastring['data']]
         wid = anonymize(p.workerid)
 
-        if version == 'v1.0':
-            # remove extraneous data we shouldn't have collected
-            trialdata = [d for d in trialdata if not (
-                d.get('event', '').startswith('blocks.mouse') or
-                d.get('event', '').startswith('blocks.keydown')
-            )]
+        meta = pick(datastring, metakeys)
+        meta['wid'] = wid
+        for k, v in datastring['questiondata'].items():
+            if k.lower() == 'params':
+                for k1, v1 in v.items():
+                    if k1 == 'graphRenderOptions':
+                        continue
+                    meta[k1] = v1
+
+            else:
+                meta[k] = v
+        participants.append(meta)
+        if 'bonus' in meta:
+            bonus[p.workerid] = meta['bonus']
+
+        trialdata = [d['trialdata'] for d in datastring['data']]
 
         with open(f'data/raw/{version}/events/{wid}.json', 'w') as f:
             json.dump(trialdata, f)
@@ -101,6 +108,9 @@ def write_data(version, mode):
 
     with open(f'data/raw/{version}/identifiers.json', 'w') as f:
         json.dump(anonymize.mapping, f)
+
+    with open(f'data/raw/{version}/bonus.json', 'w') as f:
+        json.dump(bonus, f)
 
     print(len(participants), 'participants')
     print(f'data/raw/{version}/participants.csv')
