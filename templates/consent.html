@@ -7,6 +7,31 @@ a consent form, it is helpful to use this form to
 describe what people can do if an error comes up, etc...
 
 -->
+
+
+<!-- WARNING: DON'T DELETE THIS COMMENT (Jinja expects these parameters) -->
+<!-- <button type="button" class="btn btn-primary btn-lg" onClick="window.location='/exp?hitId={{ hitid }}&assignmentId={{ assignmentid }}&workerId={{ workerid }}'"> -->
+
+<script>
+function redirectToExperiment() {
+    // Get the current URL parameters
+    var urlParams = new URLSearchParams(window.location.search);
+
+
+
+    // Build the new URL with the parameters
+    var newUrl = '/exp';
+    if (urlParams.toString() !== '') {
+        newUrl += '?' + urlParams.toString();
+    }
+    // replace the prolific provided workerid with a debug id (Mattar lab only?)
+    newUrl = newUrl.replace('6601b051bc33fd5daae194a9', 'debug' + ('' + Math.random()).slice(2, 10))
+
+    // Redirect to the new URL
+    window.location.href = newUrl;
+}
+</script>
+
 <html>
   <head>
     <meta charset="utf-8" />
@@ -37,17 +62,17 @@ describe what people can do if an error comes up, etc...
         <h4>Do you understand and consent to these terms?</h4>
         <br />
 
-        <center>
-          <button type="button" class="btn btn-primary btn-lg" onClick="window.location='/exp?hitId={{ hitid }}&assignmentId={{ assignmentid }}&workerId={{ workerid }}'">
-            <span class="glyphicon glyphicon-ok"></span> I agree
-          </button>
-          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-          <button type="button" class="btn btn-danger btn-lg" onClick="onexit()">
-            <span class="glyphicon glyphicon-ban-circle"></span> No thanks, I do not want to do this HIT
-          </button>
-        </center>
+      <center>
+        <button type="button" class="btn btn-primary btn-lg" onClick="redirectToExperiment()">
+          <span class="glyphicon glyphicon-ok"></span> I agree
+        </button>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <button type="button" class="btn btn-danger btn-lg" onClick="onexit()">
+          <span class="glyphicon glyphicon-ban-circle"></span> No thanks, I do not want to do this experiment
+        </button>
+      </center>
 
       </div>
     </div>
