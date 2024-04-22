@@ -48,6 +48,7 @@ $(window).on('load', async () => {
 const eventCallbacks = []
 
 function logEvent(event, info={}){
+  info = _.cloneDeep(info)
   if (typeof(event) == 'object') {
     info = event;
   } else {
