@@ -48,12 +48,12 @@ class Prolific(object):
                 print("Saved to .project_id - we won't ask again.")
             return project_id
 
-    def _request(self, method, url, **kws):
+    def _request(self, method, url, json=None, **kws):
         if url.startswith('/'):
             url = 'https://api.prolific.co/api/v1' + url
         if not url.endswith('/') and '?' not in url:  # adding / prevents redirecting POST requests
             url += '/'
-        r = requests.request(method, url, **kws, headers={
+        r = requests.request(method, url, **kws, json=json, headers={
             'Authorization': f'Token {self.token}',
         })
         response = r.json()
@@ -394,7 +394,7 @@ def generate_internal_name():
     conf = read_config()
     try:
         version = conf["Task Parameters"]["experiment_code_version"]
-    else:
+    except:
         from datetime import datetime
         version = datetime.now().strftime('%b%d')
     try:
