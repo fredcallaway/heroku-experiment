@@ -263,7 +263,8 @@ class Prolific(object):
         for k, v in dict(read_config()['Prolific']).items():
             if k == 'description':
                 v = markdown(v)
-            kws[k] = v
+            elif k not in kws:
+                kws[k] = v
 
         if '.' in kws['reward']:
             print('WARNING: found a . in config.txt reward. Specify this value in cents (removing for now)')
