@@ -6,6 +6,10 @@ const urlParams = _.mapValues(Object.fromEntries(new URLSearchParams(window.loca
 const prolific = true;
 const local = (mode === "demo" || mode === "{{ mode }}")
 
+if (local) {
+  console.log("RUNNING IN LOCAL MODE: DATA WILL NOT BE SAVED!")
+}
+
 const CONDITION =
   urlParams.condition ??
   (condition == "{{ condition }}" ? 0 : parseInt(condition, 10))
@@ -91,12 +95,13 @@ function eventPromise(predicate) {
 }
 
 function saveData() {
-  logEvent('data.attempt')
   return new Promise((resolve, reject) => {
     if (local || mode === 'demo') {
+      logEvent('data.dummy_attempt')  // don't try to contact database in local mode
       resolve('local');
       return;
     }
+    logEvent('data.attempt')
     const timeout = delay(10000, () => {
       logEvent('data.timeout')
       reject('timeout');
