@@ -203,7 +203,7 @@ class Prolific(object):
         completed + active participants.
         """
         study_id = self.study_id(study)
-        self.add_places(study_id, new_total)
+        self._request('PATCH', f'/studies/{study_id}/', {'total_available_places': new_total})
 
     def pause(self, study=0):
         """Temporarily pause recruiting new participants"""
@@ -233,25 +233,27 @@ class Prolific(object):
         if isinstance(n, str): return n
         return self._studies()[-(n+1)]['id']
 
-    def post_duplicate(self, study=0, **kws):
+    def post_duplicate(self, study=0, no_check=False, **kws):
         """Post a duplicate of the given study using current fields in config.txt"""
         study_id = self.study_id(study)
-        # check that changes are pushed
-        try:
-            diff = subprocess.getoutput('git diff --stat heroku/master')
-        except:
-            try:
-                diff = subprocess.getoutput('git diff --stat origin/master')
-            except:
-                diff = ''
 
-        if diff != '':
-            print("WARNING: The git working tree has unpushed changes.")
-            print(diff)
-            y = input('Continue anyway? [y/N] ')
-            if y.lower() != 'y':
-                print('Aborting')
-                exit(1)
+        if not no_check:
+            # check that changes are pushed
+            try:
+                diff = subprocess.getoutput('git diff --stat heroku/master')
+            except:
+                try:
+                    diff = subprocess.getoutput('git diff --stat origin/master')
+                except:
+                    diff = ''
+
+            if diff != '':
+                print("WARNING: The git working tree has unpushed changes.")
+                print(diff)
+                y = input('Continue anyway? [y/N] ')
+                if y.lower() != 'y':
+                    print('Aborting')
+                    exit(1)
 
         new = self._request('POST', f'/studies/{study_id}/clone/')
         new_id = new['id']
@@ -292,7 +294,7 @@ class Prolific(object):
         )
         print("STUDY LINK:", study_link)
 
-        confirm = input(f'Go ahead? [y/N] ')
+        confirm = 'y' if no_check else input(f'Go ahead? [y/N] ')
         if confirm.lower() == 'y' and new['total_cost'] > 20000:
             confirm = input("EXPENSIVE! Just to be sure, you want to spend", new['total_cost'], 'correct? [y/N] ')
         if confirm.lower() == 'y':
