@@ -2,6 +2,8 @@
 
 A starter pack for running online experiments on Heroku using Psiturk or Prolific.
 
+**Note: Looking for the previous version using JsPsych? See the [jspsych branch](https://github.com/fredcallaway/heroku-experiment/tree/jspsych).**
+
 ## Setup
 
 ### Dependencies
