@@ -61,22 +61,22 @@ This makes heroku build your app, which can take a minute or so. Then your websi
 - You will find some tutorial-like information there and in static/js/instructions.js
 - If you have multiple conditions, use the CONDITION variable. The number of conditions is set in config.txt. You can manually specify the condition while debugging by adding `&condition=1` to the URL.
 - Add any additional experiment files and dependencies to templates/exp.html.
-- Run `make static` to preview your experiment.
+- Run `make dev` to preview your experiment.
 - Edit, refresh, edit, refresh, edit, refresh....
+
+
+### Saving data
+Data is recorded with the `logEvent` function, e.g. `logEvent('trial.complete', {choice, rt})`.
+
+It's up to you how you want to handle data representation. Frameworks like jsPsych often batch up all the data for a trial into one object. You can do that if you want; just call `logEvent` at the end of each trial passing a big object with all the data. I prefer to just put a logEvent any time anything happens and then I worry about formatting it later.
 
 **By default, data will not be saved when running locally**. If you want to save data while debugging, follow these steps:
 
-- Run `make dev` instead of make `static`
-- Visit <http://localhost:22362/test>. The port (22362) is configured in config.txt. 
+- Make sure you're using `make dev` and not viewing index.html as a static page.
+- Visit <http://localhost:22362/test>. The port (22362) is configured in config.txt. The critical addition is to add "/test" at the end of the URL.
 - The fields necessary to store your data will be automatically added to the URL. Take note of or change the workerid (something like debug58523) if you wish. Note that if you use the same id twice, it will overwrite the previous data.
 - The data will be saved to the local participants.db sqlite database.
-
-## Downloading data
-
-- Run `bin/fetch_data.py [codeversion]`. codeversion is set to the current version (set in config.txt) if you don't specify it.
-- Pass the `--local` flag if you want to "download" from the local participants.db database.
-- You will find the data in `data/raw/[codeversion]/events/`. There is one file per participant. It is a json list with one object for every time you called `logEvent`.
-- Note: it's up to you how you want to handle data representation. Frameworks like jsPsych often batch up all the data for a trial into one object. You can do that if you want; just call `logEvent` at the end of each trial passing a big object with all the data. I prefer to just put a logEvent any time anything happens and then I worry about formatting it later.
+- See the downloading section below for details.
 
 ## Posting your study
 
@@ -91,9 +91,10 @@ For your first pass, you should create the study with Prolific's web interface.
 3. Select "I'll redirect them using a URL". Copy the code and set it as `PROLIFIC_CODE` in experiment.js, e.g. `const PROLIFIC_CODE = "6A5FDC7A"`.
 4. As always, do a dry run with Prolific's "preview" mechanism before actually posting the study. I also recommend running only a couple people on your first go in case there are unforseen issues.
 
+#### Prolific CLI
 We also provide an alpha-release CLI for Prolific, using the Prolific API. Run `bin/prolific.py` to see the available commands. The most useful ones are 
 
-- `approve_and_bonus` does what you think it does using the bonus.csv file produced by `bin/fetch_data.py`
+- `pay` approves subbmissions and assigns bonuses using the bonus.csv file produced by `bin/fetch_data.py`
 - `post_duplicate` posts a copy of your last study (as if you had used Prolific's "duplicate study" feature) with an updated name. You can update the pay and number of places in config.txt. It won't actually post the study without you confirming (after printing a link to preview it on Prolific).
 
 You'll need to install two additional dependencies for this script: `pip install markdown fire`
@@ -106,25 +107,13 @@ Start the psiturk shell with the command `psiturk`. Run `hit create 30 1.50 0.5`
 
 ## Downloading data
 
-To download data for a given version run
+To download data for a given version run `bin/fetch_data.py <VERSION>`. If you don't provide a version, it will use the current one in config.txt.
 
-```
-bin/fetch_data.py <VERSION>
-```
+You will find the data in `data/raw/[codeversion]/events/`. There is one file per participant. It is a json list with one object for every time you called `logEvent`. This data has identifiers and should not be shared. Make sure not to accidentally put it on github (data is in .gitignore so this shouldn't be a problem). The mapping from the anonymized "wid" to "workerid" is saved in data/raw/<VERSION>/identifiers.csv.
 
-If you don't provide a version, it will use the current one in config.txt.
+**What if you don't see the data?** If you're looking for data that you generated while testing, make sure you used the /test URL as described above.
 
-The raw psiturk data is put in data/raw. This data has identifiers and should not be shared. Make sure not to accidentally put it on github (data is in .gitignore so this shouldn't be a problem). The mapping from the anonymized "wid" to "workerid" is saved in data/raw/<VERSION>/identifiers.csv.
-
-Minimally processed (and de-identified) data is written as JSON files in data/processed.
-
-Note: **data will not be saved when testing locally**. If you want to save data while debugging, you will need to run the experiment on heroku and pass the relevant URL parameters, for example:
-
-https://dizzydangdoozle-4cd6ae16d401.herokuapp.com/exp?mode=live&workerId=debug123&hitId=prolific&assignmentId=debug123
-
-If you don't want to overwrite the previously saved debug data, you have to change the workerId or assignmentId. 
-
-Additionally, by default `bin/fetch_data.py` will not download data with "debug" in the workerId or assignmentId. You can pass the `--debug` flag to disable this behavior and download all data.
+If you want to "download" data from the local participants.db database (if you were testing using `make dev`, not on the live heroku page), then use `bin/fetch_data.py --local` flag. If you want to include data you generated while testing the heroku site (using the /test URL), then use the `--debug` flag. By default, `bin/fetch_data.py` will not download data with "debug" in the workerId or assignmentId.
 
 ## Posting static versions
 

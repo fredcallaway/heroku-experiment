@@ -1,4 +1,5 @@
-var ERROR_EMAIL = '' // I really hope you set this in experiment.js
+var ERROR_EMAIL = 'EMAIL NOT FOUND' // I really hope you set this in experiment.js
+var PROLIFIC_CODE = 'CODE NOT FOUND' // I really hope you set this in experiment.js
 
 _.compose = _.flowRight  // for psiturk
 const psiturk = new PsiTurk(uniqueId, adServerLoc, mode);
@@ -48,9 +49,8 @@ $(window).on('load', async () => {
   }
 });
 
-
 const eventCallbacks = []
-
+// record an event (e.g. stimulus display, response) in the database
 function logEvent(event, info={}){
   info = _.cloneDeep(info)
   if (typeof(event) == 'object') {
@@ -68,6 +68,18 @@ function logEvent(event, info={}){
   psiturk.recordTrialData(info);
 }
 
+const _participantKeys = new Set()
+// record an arbitrary key-value pair in the database (use for high-level participant information)
+function recordData(key, value) {
+  logEvent('experiment.recordData', {key, value})
+  if (_participantKeys.has(key)) {
+    console.log(`WARNING: recordData has overwritten ${key}`)
+  }
+  _participantKeys.add(key)
+  psiturk.recordUnstructuredData(key, value)
+}
+
+// call a function every time logEvent is run---this is very useful!
 function registerEventCallback(f) {
   eventCallbacks.push(f)
 }
@@ -76,6 +88,9 @@ function removeEventCallback(f) {
   _.pull(eventCallbacks, f)
 }
 
+// a promise that resolves when an event matching predicate occurs
+// `predicate`` can be a string starting with the event type or a function
+// that takes the event information and returns a boolean.
 function eventPromise(predicate) {
   let match = ''
   if (typeof(predicate) == 'string') {
@@ -94,6 +109,10 @@ function eventPromise(predicate) {
   return promise
 }
 
+// write all locally stored to the database
+// calling this often will put greater strain on your heroku server,
+// but it will allow you to recover partial data when a participant
+// doesn't finish the experiment
 function saveData() {
   return new Promise((resolve, reject) => {
     if (local || mode === 'demo') {
@@ -121,7 +140,7 @@ function saveData() {
   });
 };
 
-
+// saves data, then shows completion screen
 function completeExperiment() {
   logEvent('experiment.complete');
   $.ajax("complete_exp", {
@@ -187,7 +206,6 @@ async function showCompletionScreen() {
     `);
   }
 };
-
 
 
 function handleError(e) {
