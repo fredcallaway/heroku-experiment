@@ -159,11 +159,12 @@ class Prolific(object):
         else:
             print('No submissions to approve')
 
-    def assign_bonuses(self, study=0, bonuses='bonus.csv'):
+    def assign_bonuses(self, study=0, bonuses='bonus.json'):
         """Assign bonuses for the last study, specified in a dictionary or file.
 
-        By default, it will read bonus.csv, which has format workerid,bonus_in_dollars (no header).
-        A json file is also allowed, with workerid keys and bonus_in_dollars values.
+        By default, it will read bonus.json, with workerid keys and bonus_in_dollars values. This
+        file is generated when you run bin/fetch_data.py.
+        A csv file is also allowed, with format workerid,bonus_in_dollars (no header).
 
         If a worker has already received a bonus, then they will only be bonused if bonus_in_dollars
         is more than their current bonus (to reach the target bonus amount). It is safe to run this
@@ -219,7 +220,7 @@ class Prolific(object):
             else:
                 print('NOT paying bonuses')
 
-    def pay(self, study=0, bonuses='bonus.csv'):
+    def pay(self, study=0, bonuses='bonus.json'):
         """Run approve and then assign_bonuses for the given study. Will not double-bonus."""
         self.approve(study)
         self.assign_bonuses(study, bonuses)

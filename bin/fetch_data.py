@@ -1,4 +1,4 @@
-#!env/bin/python
+#!/usr/bin/env python3
 
 import os
 import subprocess
@@ -110,6 +110,9 @@ def write_data(version, mode):
         json.dump(anonymize.mapping, f)
 
     with open(f'data/raw/{version}/bonus.json', 'w') as f:
+        json.dump(bonus, f)
+
+    with open(f'bonus.json', 'w') as f:
         json.dump(bonus, f)
 
     print(len(participants), 'participants')
