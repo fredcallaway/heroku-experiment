@@ -10,6 +10,20 @@ import random
 from fire import Fire
 from functools import cache, cached_property
 
+EXAMPLE_CONFIG = """
+[Prolific]
+name = Block Puzzles
+project_name = blocks
+reward = 300
+total_available_places = 15
+external_study_url = https://mydomain.herokuapp.com/consent?mode=live&hitId=prolific&workerId={{%%PROLIFIC_PID%%}}&STUDY_ID={{%%STUDY_ID%%}}&assignmentId={{%%SESSION_ID%%}}
+estimated_completion_time = 15
+description =
+    In this study, you will solve a series of puzzles that involve
+    building shapes out of blocks.
+"""
+
+
 
 class Prolific(object):
     """Prolific API wrapper and CLI interface.
@@ -17,6 +31,12 @@ class Prolific(object):
     Most commands take an optional --study argument. This can be either an
     actual study id or an index such that 0 (the default value) is the most
     recently posted study, 1 is the one before that, etc...
+
+    Basic usage:
+    - for each new experiment, create the first study using the prolific web interface
+    - use `prolific.py post_duplicate` to post all future studies
+    - use `prolific.py pay
+
     """
     def __init__(self, token=None):
         super(Prolific, self).__init__()
@@ -85,7 +105,11 @@ class Prolific(object):
         records = []
         for study in self._studies():
             for sub in self._submissions(study['id']):
+
                 records.append({
+                    'internal_name': study['internal_name'],
+                    'started_at': sub['started_at'],
+                    'time_taken':  sub['time_taken'],
                     'study_id': study['id'],
                     'participant_id': sub['participant_id'],
                     'started_at': sub['started_at'],
@@ -100,10 +124,10 @@ class Prolific(object):
         pd.DataFrame(records).to_csv('prolific_summary.csv')
 
 
-    def approve_all(self, study=0, ignore_code=False):
+    def approve(self, study=0, ignore_code=False):
         """Approve all submissions of the last study.
 
-        The "last" study refers to the most recently posted study within your project
+        The "last" study refers to the most recently posted study within your project.
         """
         study_id = self.study_id(study)
         to_approve = []
@@ -121,6 +145,7 @@ class Prolific(object):
             else:
                 bad_code.append(sub["participant_id"])
 
+
         if bad_code:
             print(f'{len(bad_code)} submissions have an incorrect code. Check',
                 f"https://app.prolific.co/researcher/workspaces/studies/{study_id}/submissions")
@@ -135,9 +160,14 @@ class Prolific(object):
             print('No submissions to approve')
 
     def assign_bonuses(self, study=0, bonuses='bonus.csv'):
-        """Assign bonuses specified in a dictionary or file.
+        """Assign bonuses for the last study, specified in a dictionary or file.
 
-        By default will use bonus.csv, which has format workerid,bonus_in_dollars (no header).
+        By default, it will read bonus.csv, which has format workerid,bonus_in_dollars (no header).
+        A json file is also allowed, with workerid keys and bonus_in_dollars values.
+
+        If a worker has already received a bonus, then they will only be bonused if bonus_in_dollars
+        is more than their current bonus (to reach the target bonus amount). It is safe to run this
+        command many times for the same study.
         """
         study_id = self.study_id(study)
 
@@ -154,8 +184,6 @@ class Prolific(object):
                 bonuses = dict(pd.read_csv(file, header=None).set_index(0)[1])
 
         assert isinstance(bonuses, dict)
-
-        self._prolific.assign_bonuses(self._study_id, bonuses)
 
         previous_bonus = {sub['participant_id']: sum(sub['bonus_payments']) / 100
                           for sub in self._submissions(study_id)}
@@ -192,15 +220,20 @@ class Prolific(object):
                 print('NOT paying bonuses')
 
     def pay(self, study=0, bonuses='bonus.csv'):
-            """Run approve_all and then assign_bonuses for the given study."""
-            self.approve_all(study)
-            self.assign_bonuses(study, bonuses)
+        """Run approve and then assign_bonuses for the given study. Will not double-bonus."""
+        self.approve(study)
+        self.assign_bonuses(study, bonuses)
+
+    def pay_all(self, n=10):
+        """Approve and bonus the last n (default 10) studies. Will not double-bonus."""
+        for i in range(n):
+            self.approve(i)
+            self.assign_bonuses(i, bonuses)
 
     def update_places(self, new_total, study=0):
         """Set the total number of participants for the last study to `new_total`
 
-        You can also lower the number of places, though not below the current number of
-        completed + active participants.
+        You cannot be able to lower the amount of places below the current value.
         """
         study_id = self.study_id(study)
         self._request('PATCH', f'/studies/{study_id}/', {'total_available_places': new_total})
@@ -208,14 +241,14 @@ class Prolific(object):
     def pause(self, study=0):
         """Temporarily pause recruiting new participants"""
         study_id = self.study_id(study)
-        self.post(f'/studies/{study_id}/transition/', {
+        self._request('POST', f'/studies/{study_id}/transition/', {
             "action": "PAUSE"
         })
 
     def start(self, study=0):
         """Resume recruiting participants (after pausing)"""
         study_id = self.study_id(study)
-        self.post(f'/studies/{study_id}/transition/', {
+        self._request('POST', f'/studies/{study_id}/transition/', {
             "action": "START"
         })
 
@@ -234,7 +267,14 @@ class Prolific(object):
         return self._studies()[-(n+1)]['id']
 
     def post_duplicate(self, study=0, no_check=False, **kws):
-        """Post a duplicate of the given study using current fields in config.txt"""
+        """Post a duplicate of the given study using current fields in config.txt
+
+        See https://docs.prolific.com/docs/api-docs/public/#tag/Studies/operation/DuplicateStudy
+        for documentation of parameters. These can be passed with a commandline argument
+        or in the config.txt file.
+
+        You will have an opportunity to preview the study on prolific before it actually posts.
+        """
         study_id = self.study_id(study)
 
         if not no_check:
@@ -257,16 +297,20 @@ class Prolific(object):
 
         new = self._request('POST', f'/studies/{study_id}/clone/')
         new_id = new['id']
-        if 'name' not in kws:
-            kws['name'] = new['name'].replace(' Copy', '')
-        if 'internal_name' not in kws:
-            kws['internal_name'] = generate_internal_name()
 
         for k, v in dict(read_config()['Prolific']).items():
             if k == 'description':
                 v = markdown(v)
             elif k not in kws:
                 kws[k] = v
+
+        if 'name' not in kws:
+            kws['name'] = new['name'].replace(' Copy', '')
+        if 'internal_name' not in kws:
+            kws['internal_name'] = generate_internal_name()
+        if 'url_params' in kws:
+            kws['external_study_url'] += '&' + kws['url_params'].lstrip('&')
+
 
         if '.' in kws['reward']:
             print('WARNING: found a . in config.txt reward. Specify this value in cents (removing for now)')
@@ -373,18 +417,6 @@ def find_token():
             f.write('\n.prolific_token')
         print("Saved to .prolific_token — we added this file to your .gitignore as well.")
         return token
-
-EXAMPLE_CONFIG = """
-[Prolific]
-name = Block Puzzles
-project_name = blocks
-reward = 300
-total_available_places = 15
-estimated_completion_time = 15
-description =
-    In this study, you will solve a series of puzzles that involve
-    building shapes out of blocks.
-"""
 
 def read_config():
     if not os.path.isfile('config.txt'):
