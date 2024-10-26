@@ -12,6 +12,16 @@ const PARAMS = conditionParameters(CONDITION, {
   anotherParameter: [1, 2, 3],
 })
 
+const BONUS = new Bonus({
+  points_per_cent: 100,
+  initial: 0,
+})
+registerEventCallback((data) => {
+  if (data.event == "task.hit") {
+    BONUS.addPoints(10)
+  }
+})
+
 // this allows passing condition params with URL parameters e.g. &showSecretStage=true
 updateExisting(PARAMS, urlParams)
 
@@ -37,15 +47,20 @@ async function runExperiment() {
   async function main() {
     DISPLAY.empty() // make sure the page is clear
 
-    let trials = [1,2,3]
+    let trials = [
+      {timeout: 3000, targetSize: 20},
+      {timeout: 2000, targetSize: 15},
+      {timeout: 1000, targetSize: 10},
+    ]
     // convenience class that handles a round number incrementer
     // optionally you can provide help text which will make a question button on the right
     let top = new TopBar({
       nTrial: trials.length,
       height: 70,
       width: 900,
+      bonus: BONUS,
       help: `
-        Write some help text here.
+        Click on the black circles as quickly as you can.
       `
     }).prependTo(DISPLAY)
 
@@ -54,14 +69,13 @@ async function runExperiment() {
     for (let trial of trials) {
       // you will probably want to define a more interesting task here
       // or in a separate file (make sure to include it in exp.html)
-      workspace.empty()
+      // workspace.empty()
+      let outcome = await new ExampleTask(trial).run(workspace)
+      if (outcome == "win") {
+        BONUS.addPoints(50)
+      }
 
-      // inputs.js includes many common ways to get user input
-      let btn = button(workspace, 'click me').css({marginTop: 150, marginLeft: -400 + 200 * trial})
-      // `button` logs interactions automatically, but let's be safe
-      logEvent('trial.response', {trial})
-      await btn.promise()  // code will pause here until the button is clicked
-
+      await sleep(1000)
       top.incrementCounter()
       saveData() // this sends the data to the database, optional (will increase server load)
     }

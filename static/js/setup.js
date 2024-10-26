@@ -109,6 +109,20 @@ function eventPromise(predicate) {
   return promise
 }
 
+// run a sequence of blocks in order
+// you can specify a starting block by adding ?block=BLOCK_NAME to the URL
+async function runTimeline(...blocks) {
+  let start = _.map(blocks, "name").indexOf(urlParams.block)
+  if (start != -1) {
+    blocks = blocks.slice(start)
+  }
+  for (const block of blocks) {
+    logEvent("timeline.start." + block.name)
+    await block()
+    logEvent("timeline.end." + block.name)
+  }
+}
+
 // write all locally stored to the database
 // calling this often will put greater strain on your heroku server,
 // but it will allow you to recover partial data when a participant
@@ -188,7 +202,6 @@ function completeExperiment() {
   return saveData().catch(promptResubmit).then(showCompletionScreen);
 };
 
-
 async function showCompletionScreen() {
   logEvent('experiment.completion')
   $('#display').empty();
@@ -206,7 +219,6 @@ async function showCompletionScreen() {
     `);
   }
 };
-
 
 function handleError(e) {
   let msg = e.stack?.length > 10 ? e.stack : `${e}`;
