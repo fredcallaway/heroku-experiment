@@ -1,9 +1,10 @@
 class ExampleTask {
   logPrefix = "task" // log events will be task.run, task.done, etc.
   constructor(options = {}) {
+    window.task = this  // allows you to reference the task object from the console
     // parameters become instance variables; defaults can be overridden by options
-    let params = {
-      trialId: randomUUID(),
+    const params = {
+      trialID: "",
       targetSize: 20,
       timeout: 3000,
       nRound: 5,
@@ -11,13 +12,12 @@ class ExampleTask {
       screenWidth: 600,
       screenHeight: 400,
     }
-    // set up parameters
     Object.assign(params, options) // merge options into params
-    this.logEvent("initialize", params)
     Object.assign(this, params) // assign parameters to instance variables
-    window.task = this  // allows you to reference the task object from the console
+    this.recordEvent = DATA.eventRecorder('task', {trialID: makeUniqueID(this.trialID)})
+    this.recordEvent("initialize", params)
     this.done = makePromise() // create a promise that will be resolved when the trial is complete
-    
+
     // setup the display
     this.div = $("<div>").css({
       margin: "auto",
@@ -55,17 +55,17 @@ class ExampleTask {
       if (result != "timeout") {
         let { x, y } = result
         if (this.isHit(x, y)) {
-          this.logEvent("hit")
+          this.recordEvent("hit")
           this.canvas.clear()
         } else {
-          this.logEvent("miss")
+          this.recordEvent("miss")
           this.canvas.drawCross(x, y, 5, "red")
           await sleep(1000)
           this.showOutcome("lose")
           return
         }
       } else {  // timeout
-        this.logEvent("timeout")
+        this.recordEvent("timeout")
         this.canvas.drawCircle(this.targetX, this.targetY, this.targetSize, "red")
         await sleep(1000)
         this.showOutcome("lose")
@@ -76,7 +76,7 @@ class ExampleTask {
   }
 
   async countdown() {
-    this.logEvent("countdown")
+    this.recordEvent("countdown")
     for (let i = 3; i > 0; i--) {
       this.centerText.text(i)
       await sleep(1000)
@@ -86,7 +86,7 @@ class ExampleTask {
 
   async showOutcome(outcome) {
     this.canvas.clear()
-    this.logEvent("outcome", {outcome})
+    this.recordEvent("outcome", {outcome})
     if (outcome == "win") {
       await alert_success()
     } else {
@@ -99,7 +99,7 @@ class ExampleTask {
   drawTarget() {
     this.targetX = uniformRandom(this.targetSize, this.screenWidth - this.targetSize)
     this.targetY = uniformRandom(this.targetSize, this.screenHeight - this.targetSize)
-    this.logEvent("drawTarget", { x: this.targetX, y: this.targetY })
+    this.recordEvent("drawTarget", { x: this.targetX, y: this.targetY })
     this.canvas.clear().drawCircle(this.targetX, this.targetY, this.targetSize, "black")
   }
 
@@ -110,17 +110,17 @@ class ExampleTask {
 
   async run(display) {
     if (display) this.attach(display)
-    this.logEvent(`run`)
+    this.recordEvent(`run`)
     this.play()
     await this.done // wait until the trial is complete
-    this.logEvent(`done`) // you could also record data here
+    this.recordEvent(`done`) // you could also record data here
   }
 
   // you might not need to change anything below
 
-  logEvent(event, info = {}) {
+  recordEvent(event, info = {}) {
     info.trialID = this.trialID
-    logEvent(this.logPrefix + "." + event, info)
+    DATA.recordEvent(this.logPrefix + "." + event, info)
   }
 
   attach(display) {

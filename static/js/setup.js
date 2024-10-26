@@ -22,91 +22,131 @@ assert(typeof(CONDITION) == 'number', 'bad condition')
 var QUIET = false
 const DISPLAY = $('#display')
 
-$(window).on('load', async () => {
-  if (local) {
-    $('#display').empty()
-    await runExperiment()
-    $('#display').empty()
-  } else {
-    await saveData()
-    if (mode == 'live') {
-      await sleep(3000)
-      $('#load-icon').hide();
-      let btn = button($('#display'), 'begin')
-      btn.button.addClass('animate-bottom').css('margin-top', '40px')
-      await btn.clicked
-    } else {
-      $('#load-icon').hide();
+// EVENTS manages custom event listeners
+const EVENTS = {
+  listeners: new Map(),
+
+  on(event, callback) {
+    if (!this.listeners.has(event)) {
+      this.listeners.set(event, new Set())
     }
-    logEvent('experiment.begin', {timestring: (new Date).toTimeString()})
-    $('#display').empty()
-    try {
-      await runExperiment()
-      await completeExperiment()
-    } catch (err) {
-      handleError(err)
+    this.listeners.get(event).add(callback)
+  },
+
+  once(event, callback) {
+    const wrapper = (...args) => {
+      this.off(event, wrapper)
+      callback(...args)
     }
-  }
-});
+    this.on(event, wrapper)
+  },
 
-const eventCallbacks = []
-// record an event (e.g. stimulus display, response) in the database
-function logEvent(event, info={}){
-  info = _.cloneDeep(info)
-  if (typeof(event) == 'object') {
-    info = event;
-  } else {
-    info.event = event;
-  }
-  info.time = Date.now();
-  for (let f of eventCallbacks) {
-    f(info)
-  }
-  if (!event.includes('mousemove') && !QUIET) {
-    console.log('logEvent', info.event, info);
-  }
-  psiturk.recordTrialData(info);
-}
+  promise(event, predicate=(event, data) => true) {
+    const promise = makePromise()
+    const wrapper = (event, data) => {
+      if (predicate(event, data)) {
+        this.off(event, wrapper)
+        promise.resolve({event, data})
+      }
+    }
+    this.on(event, wrapper)
+    return promise
+  },
 
-const _participantKeys = new Set()
-// record an arbitrary key-value pair in the database (use for high-level participant information)
-function recordData(key, value) {
-  logEvent('experiment.recordData', {key, value})
-  if (_participantKeys.has(key)) {
-    console.log(`WARNING: recordData has overwritten ${key}`)
-  }
-  _participantKeys.add(key)
-  psiturk.recordUnstructuredData(key, value)
-}
+  off(event, callback=null) {
+    if (this.listeners.has(event)) {
+      if (callback) {
+        this.listeners.get(event).delete(callback)
+      } else {
+        this.listeners.delete(event)
+      }
+    }
+  },
 
-// call a function every time logEvent is run---this is very useful!
-function registerEventCallback(f) {
-  eventCallbacks.push(f)
-}
+  offRecursive(event) {
+    for (const [key, value] of this.listeners) {
+      if (key.startsWith(event)) {
+        this.listeners.delete(key)
+      }
+    }
+  },
 
-function removeEventCallback(f) {
-  _.pull(eventCallbacks, f)
-}
-
-// a promise that resolves when an event matching predicate occurs
-// `predicate`` can be a string starting with the event type or a function
-// that takes the event information and returns a boolean.
-function eventPromise(predicate) {
-  let match = ''
-  if (typeof(predicate) == 'string') {
-    match = predicate
-    predicate = (info) => info.event.startsWith(match)
-  }
-  let promise = makePromise()
-  let func = (info) => {
-    if (predicate(info)) {
-      logEvent('eventPromise.resolve', {match})
-      promise.resolve()
+  emit(event, data) {
+    const parts = event.split('.')
+    for (let i = parts.length; i > 0; i--) {
+      const namespace = parts.slice(0, i).join('.')
+      if (this.listeners.has(namespace)) {
+        for (const callback of this.listeners.get(namespace)) {
+          callback(event, data)
+        }
+      }
     }
   }
-  promise.finally(() => removeEventCallback(func))
-  registerEventCallback(func)
-  return promise
+}
+
+// DATA stores data and uploads it to the database.
+const DATA = {
+  keyValues: new Map(),
+  events: [],
+
+  // Stores a key-value pair
+  setKeyValue(key, value) {
+    this.recordEvent('data.setKeyValue', {key, value})
+    if (this.keyValues.has(key)) {
+      console.log(`WARNING: setKeyValue has overwritten ${key}`)
+    }
+    this.keyValues.set(key, value)
+    psiturk.recordUnstructuredData(key, value)
+  },
+
+  // Records an event and emits it to custom listeners
+  recordEvent(event, data={}) {
+    if (data.timestamp === undefined) {
+      data.timestamp = Date.now()
+    }
+    if (!event.includes("mousemove") && !QUIET) {
+      console.log("recordEvent", event, data)
+    }
+    data.event = event
+    this.events.push(data)
+    psiturk.recordTrialData(data)
+    EVENTS.emit(event, data)
+  },
+
+  // Returns a function that records events with a given prefix and extra data
+  eventRecorder(eventPrefix, extraData) {
+    return (event, data) => {
+      this.recordEvent(eventPrefix + '.' + event, {...extraData, ...data})
+    }
+  },
+
+  // Saves data to the server or resolves immediately in local/demo mode
+  save() {
+    return new Promise((resolve, reject) => {
+      if (local || mode === 'demo') {
+        this.recordEvent('data.dummy_attempt')  // don't try to contact database in local mode
+        resolve('local');
+        return;
+      }
+      this.recordEvent('data.attempt')
+      const timeout = delay(10000, () => {
+        this.recordEvent('data.timeout')
+        reject('timeout');
+      });
+      psiturk.saveData({
+        error: () => {
+          clearTimeout(timeout);
+          this.recordEvent('data.error')
+          reject('error');
+        },
+        success: () => {
+          clearTimeout(timeout);
+          this.recordEvent('data.success')
+          resolve();
+        }
+      });
+    });
+  }
 }
 
 // run a sequence of blocks in order
@@ -117,46 +157,43 @@ async function runTimeline(...blocks) {
     blocks = blocks.slice(start)
   }
   for (const block of blocks) {
-    logEvent("timeline.start." + block.name)
+    DATA.recordEvent("timeline.start." + block.name)
     await block()
-    logEvent("timeline.end." + block.name)
+    DATA.recordEvent("timeline.end." + block.name)
   }
 }
 
-// write all locally stored to the database
-// calling this often will put greater strain on your heroku server,
-// but it will allow you to recover partial data when a participant
-// doesn't finish the experiment
-function saveData() {
-  return new Promise((resolve, reject) => {
-    if (local || mode === 'demo') {
-      logEvent('data.dummy_attempt')  // don't try to contact database in local mode
-      resolve('local');
-      return;
+$(window).on('load', async () => {
+  if (local) {
+    $('#display').empty()
+    await runExperiment()
+    $('#display').empty()
+  } else {
+    await DATA.save()
+    if (mode == 'live') {
+      await sleep(3000)
+      $('#load-icon').hide();
+      let btn = button($('#display'), 'begin')
+      btn.button.addClass('animate-bottom').css('margin-top', '40px')
+      await btn.clicked
+    } else {
+      $('#load-icon').hide();
     }
-    logEvent('data.attempt')
-    const timeout = delay(10000, () => {
-      logEvent('data.timeout')
-      reject('timeout');
-    });
-    psiturk.saveData({
-      error: () => {
-        clearTimeout(timeout);
-        logEvent('data.error')
-        reject('error');
-      },
-      success: () => {
-        clearTimeout(timeout);
-        logEvent('data.success')
-        resolve();
-      }
-    });
-  });
-};
+    DATA.recordEvent('experiment.begin', {timestring: (new Date).toTimeString()})
+    $('#display').empty()
+    try {
+      await runExperiment()
+      await completeExperiment()
+    } catch (err) {
+      handleError(err)
+    }
+  }
+});
+
 
 // saves data, then shows completion screen
 function completeExperiment() {
-  logEvent('experiment.complete');
+  DATA.recordEvent('experiment.complete');
   $.ajax("complete_exp", {
     type: "POST",
     data: { uniqueId }
@@ -180,7 +217,7 @@ function completeExperiment() {
       $("#submit-error").show();
       $("#ntry").html(triesLeft);
       triesLeft -= 1;
-      return saveData().catch(promptResubmit);
+      return DATA.save().catch(promptResubmit);
     } else {
       console.log('GIVE UP');
       $('#display').html(`
@@ -199,11 +236,11 @@ function completeExperiment() {
       });
     }
   };
-  return saveData().catch(promptResubmit).then(showCompletionScreen);
+  return DATA.save().catch(promptResubmit).then(showCompletionScreen);
 };
 
 async function showCompletionScreen() {
-  logEvent('experiment.completion')
+  DATA.recordEvent('experiment.completion')
   $('#display').empty();
   if (prolific) {
     $("#load-icon").remove();
@@ -223,7 +260,7 @@ async function showCompletionScreen() {
 function handleError(e) {
   let msg = e.stack?.length > 10 ? e.stack : `${e}`;
   const workerIdMessage = typeof workerId !== "undefined" && workerId !== null ? workerId : 'N/A';
-  logEvent('experiment.error', {msg})
+  DATA.recordEvent('experiment.error', {msg})
   const message = `Prolific Id: ${workerIdMessage}\n${msg}`;
   const link = `<a href="mailto:${ERROR_EMAIL}?subject=ERROR in experiment&body=${encodeURIComponent(message)}">Click here</a> to report the error by email.`;
 

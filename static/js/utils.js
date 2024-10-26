@@ -1,311 +1,5 @@
 
-//#region INSTRUCTIONS ********************************************************
-
-const DEFAULT_INSTRUCT_HELP = `
-  Use the << and >> buttons to flip through the sections. You have
-  to follow all the instructions on a page before you can advance to the next one.
-  If you get stuck, try clicking << and then >> to start the section over.
-`
-
-class Instructions {
-  /**
-   * Create an Instructions instance.
-   * Stages of the instructions are defined as methods that begin with `stage_`.
-   * Stages run in the order that they're defined
-   * Testing tip: add ?instruct=X to the URL to start on a specific stage; X can be a stage name or number
-   * @param {Object} options - Configuration options
-   * @param {number} [options.promptWidth=700] - Width of the prompt area
-   * @param {number} [options.promptHeight=100] - Minimum height of the prompt area
-   * @param {string} [options.contentWidth="100%"] - Width of the content area
-   * @param {number|null} [options.contentHeight=null] - Minimum height of the content area; null for auto
-   * @param {string} [options.helpText=DEFAULT_INSTRUCT_HELP] - Help text to display when the ? button is clicked
-   * @param {boolean} [options.debugDivs=false] - Whether to show borders around divs (helpful for debugging layout issues)
-   */
-  constructor(options = {}) {
-    _.defaults(options, {
-      promptWidth: 700,
-      promptHeight: 100,
-      contentWidth: "100%",
-      contentHeight: null,
-      helpText: DEFAULT_INSTRUCT_HELP,
-      debugDivs: false,
-    })
-
-    this.options = options
-
-    this.div = $("<div>").css({
-      position: "relative",
-      width: "100%",
-      border: options.debugDivs ? "1px solid black" : "none",
-    })
-
-    this.btnHelp = $("<button>")
-      .appendTo(this.div)
-      .addClass("btn-help")
-      .text("?")
-      .css({
-        position: "absolute",
-        right: "0px",
-        top: "10px",
-      })
-      .click(async () => {
-        await Swal.fire({
-          title: "Help",
-          html: options.helpText,
-          icon: "info",
-          confirmButtonText: "Got it!",
-        })
-      })
-
-    this.top = $("<div>")
-      .css({
-        position: "relative",
-        margin: "auto",
-        minHeight: options.promptHeight,
-        width: options.promptWidth,
-        marginTop: "10px",
-        marginBottom: "20px",
-        border: options.debugDivs ? "1px solid red" : "none",
-      })
-      .appendTo(this.div)
-
-    this.btnPrev = $("<button>")
-      .addClass("btn")
-      .text("<<")
-      .css({
-        position: "absolute",
-        top: "20px",
-        left: "-80px",
-      })
-      .click(() => this.runPrev())
-      .prop("disabled", true)
-      .appendTo(this.top)
-
-    this.btnNext = $("<button>")
-      .addClass("btn")
-      .text(">>")
-      .css({
-        position: "absolute",
-        top: "20px",
-        right: "-80px",
-      })
-      .click(() => this.runNext())
-      .prop("disabled", true)
-      .appendTo(this.top)
-
-    this.title = $("<h1>").addClass("text").appendTo(this.top)
-
-    this.prompt = $("<div>").addClass("text").appendTo(this.top)
-
-    this.content = $("<div>")
-      .css({
-        width: options.contentWidth,
-        minHeight: options.contentHeight,
-        position: "relative",
-        margin: "auto",
-        padding: "10px",
-        border: options.debugDivs ? "1px solid blue" : "none",
-      })
-      .appendTo(this.div)
-
-    this.stage = 1
-    this.maxStage = 1
-    this.stages = Object.getOwnPropertyNames(Object.getPrototypeOf(this))
-      .filter((f) => f.startsWith("stage"))
-      .map((f) => this[f])
-
-    this.completed = makePromise()
-    this.promises = []
-    this.eventCallbacks = []
-  }
-
-  /**
-   * Attach to a display element
-   * @param {object} display - display element (usually DISPLAY)
-   * @returns {Instructions} this instance for chaining
-   */
-  attach(display) {
-    display.empty()
-    this.div.appendTo(display)
-    return this
-  }
-
-  /**
-   * Run the instructions
-   * @param {object} display - display element (usually DISPLAY)
-   * @param {number} stage - stage number to start on
-   * @returns {Promise} resolves when instructions are completed
-   */
-  async run(display, stage) {
-    if (display) this.attach(display)
-    if (stage == undefined && urlParams.instruct) {
-      stage = urlParams.instruct
-    }
-    if (isNaN(stage)) {
-      // if the stage is not a number, treat it as a name
-      stage =
-        this.stages.findIndex(
-          (s) => s.name === stage || s.name === `stage_${stage}`
-        ) + 1
-    } else {
-      stage = parseInt(stage)
-    }
-    console.log("stage", stage)
-    this.runStage(stage)
-    await this.completed
-  }
-
-  /**
-   * Set the prompt text
-   * @param {string} md - markdown text
-   */
-  setPrompt(md) {
-    this.prompt.html(markdown(md))
-  }
-
-  /**
-   * Append to the prompt text
-   * @param {string} md - markdown text
-   */
-  appendPrompt(md) {
-    this.prompt.append(markdown(md))
-  }
-
-  /**
-   * Add a button to the prompt and awaits the user to click it
-   * @param {string} text - button text
-   * @param {object} opts - button options, passed to button()
-   * @returns {Promise} resolves when button is clicked
-   */
-  async button(text = "continue", opts = {}) {
-    _.defaults(opts, { delay: 0 })
-    let btn = button(this.prompt, text, opts)
-    await this.registerPromise(btn.clicked)
-    btn.remove()
-  }
-
-  /**
-   * Run a specific stage
-   * @param {number} stage - stage number (1-indexed)
-   */
-  async runStage(stage) {
-    console.log("runStage", stage)
-    if (isNaN(stage) || stage < 1 || stage > this.stages.length) {
-      alert("Invalid stage! Resetting to previous stage.")
-      stage = this.stage
-    }
-    console.log("runStage", stage)
-    logEvent(`instructions.runStage.${stage}`, {
-      stage: this.stages[stage - 1].name,
-    })
-    this.rejectPromises()
-    this.cancelEventCallbacks()
-    this.prompt.empty()
-    this.content.empty()
-    this.maxStage = Math.max(this.maxStage, stage)
-    this.stage = stage
-    this.btnNext.prop("disabled", this.stage >= this.maxStage)
-    this.btnPrev.prop("disabled", this.stage <= 1)
-    this.title.text(`Instructions (${this.stage}/${this.stages.length})`)
-
-    await this.stages[stage - 1].bind(this)()
-    if (this.stage == stage) {
-      // check to make sure we didn't already move forward
-      this.enableNext()
-    }
-  }
-
-  runNext() {
-    saveData()
-    logEvent("instructions.runNext")
-    this.btnNext.removeClass("btn-pulse")
-    if (this.stage == this.stages.length) {
-      logEvent("instructions.completed")
-      psiturk.finishInstructions()
-      this.completed.resolve()
-      this.div.remove()
-    } else {
-      this.runStage(this.stage + 1)
-    }
-  }
-
-  runPrev() {
-    logEvent("instructions.runPrev")
-    this.runStage(this.stage - 1)
-  }
-
-  enableNext() {
-    this.btnNext.addClass("btn-pulse")
-    this.maxStage = this.stage + 1
-    this.btnNext.prop("disabled", false)
-  }
-
-  /**
-   * Register a promise to be rejected when stage changes
-   * @param {Promise} promise - promise to register
-   * @returns {Promise} the registered promise
-   */
-  registerPromise(promise) {
-    if (!promise.reject) {
-      throw new Error("promise must have reject method")
-    }
-    this.promises.push(promise)
-    return promise
-  }
-
-  /**
-   * Create and register an event promise (see registerPromise and eventPromise)
-   * Using this wrapper ensures that promises are automatically removed when the stage changes
-   * @param {...any} args - arguments for eventPromise
-   * @returns {Promise} the registered event promise
-   */
-  eventPromise(...args) {
-    return this.registerPromise(eventPromise(...args))
-  }
-
-  /**
-   * Create and register a sleep promise (see registerPromise)
-   * @param {number} ms - milliseconds to sleep
-   * @returns {Promise} the registered sleep promise
-   */
-  sleep(ms) {
-    return this.registerPromise(sleep(ms))
-  }
-
-  /**
-   * Register an event callback (see registerEventCallback)
-   * Using this wrapper ensures that callbacks are automatically removed when the stage changes
-   * @param {Function} callback - event callback to register
-   */
-  registerEventCallback(callback) {
-    this.eventCallbacks.push(callback)
-    registerEventCallback(callback)
-  }
-
-  /**
-   * Reject all registered promises
-   */
-  rejectPromises() {
-    for (const promise of this.promises) {
-      promise.reject()
-    }
-    this.promises = []
-  }
-
-  /**
-   * Cancel all registered event callbacks
-   */
-  cancelEventCallbacks() {
-    for (const callback of this.eventCallbacks) {
-      removeEventCallback(callback)
-    }
-    this.eventCallbacks = []
-  }
-}
-
-//#endregion
-
-//#region BASIC INTERACTION ELEMENTS (text, buttons, sliders, alerts) *********
+//#region BASIC INTERACTION ELEMENTS *********
 
 // default names; you should probably pass names though
 const _input_counters = {}
@@ -326,9 +20,14 @@ function getInputValues(obj) {
 }
 
 class Input {
-  constructor({ name = undefined } = {}) {
+  constructor(options = {}) {
+    if (options.name === undefined) {
+      options.name = makeUniqueID(name ?? this.constructor.name, {
+        alwaysPostfix: true,
+      })
+    }
+    this.name = options.name
     this.div = $("<div>")
-    this.name = name ?? nextInputName(this.constructor.name)
   }
   appendTo(div) {
     this.div.appendTo(div)
@@ -341,8 +40,8 @@ class Input {
 
 class Button extends Input {
   constructor(options = {}) {
-    const { text = "continue", delay = 100, name = undefined, persistent = false } = options
-    super({ name })
+    super(options)
+    const { name, text = "continue", delay = 100, persistent = false } = options
     this.div.css("text-align", "center")
 
     this.button = $("<button>", { class: "btn btn-primary" })
@@ -352,7 +51,7 @@ class Button extends Input {
     this.clicked = makePromise()
     this.button.click(async () => {
       this.button.prop("disabled", true)
-      logEvent("input.button.click", { name: this.name, text })
+      DATA.recordEvent("input.button.click", { name, text})
       await sleep(delay)
       this.clicked.resolve()
       if (!persistent) {
@@ -392,10 +91,10 @@ class TextBox extends Input {
       })
       .appendTo(this.div)
       .focus()
-      .focus(() => logEvent("input.text.focus", { name: this.name }))
+      .focus(() => DATA.recordEvent("input.text.focus", { name: this.name }))
 
     this.textarea.blur(() => {
-      logEvent("input.text.blur", { name: this.name, text: this.val() })
+      DATA.recordEvent("input.text.blur", { name: this.name, text: this.val() })
     })
   }
   val() {
@@ -420,7 +119,7 @@ class RadioButtons extends Input {
         })
         .appendTo(btnDiv)
         .click(() =>
-          logEvent("input.radio.click", { name: this.name, value: choice })
+          DATA.recordEvent("input.radio.click", { name: this.name, value: choice })
         )
 
       $("<label>")
@@ -481,7 +180,7 @@ class Slider extends Input {
       })
       .appendTo(this.sliderContainer)
       .on("change", () => {
-        logEvent("input.slider.change", {
+        DATA.recordEvent("input.slider.change", {
           name: this.name,
           value: this.slider.val(),
         })
@@ -598,7 +297,309 @@ function alert_failure(opts = {}) {
 
 //#endregion
 
-//#region INTERFACE WRAPPERS (trial counter, gallery, drawing) **********************
+//#region INTERFACE WRAPPERS  **********************
+
+const DEFAULT_INSTRUCT_HELP = `
+  Use the << and >> buttons to flip through the sections. You have
+  to follow all the instructions on a page before you can advance to the next one.
+  If you get stuck, try clicking << and then >> to start the section over.
+`
+
+class Instructions {
+  /**
+   * Create an Instructions instance
+   * Testing tip: add ?instruct=X to the URL to start on a specific stage; X can be a stage name or number
+   * @param {Object} options - Configuration options
+   * @param {number} [options.promptWidth=700] - Width of the prompt area
+   * @param {number} [options.promptHeight=100] - Minimum height of the prompt area
+   * @param {string} [options.contentWidth="100%"] - Width of the content area
+   * @param {number|null} [options.contentHeight=null] - Minimum height of the content area; null for auto
+   * @param {string} [options.helpText=DEFAULT_INSTRUCT_HELP] - Help text to display when the ? button is clicked
+   * @param {boolean} [options.debugDivs=false] - Whether to show borders around divs (helpful for debugging layout issues)
+   */
+  constructor(options = {}) {
+    const params = {
+      promptWidth: 700,
+      promptHeight: 100,
+      contentWidth: "100%",
+      contentHeight: null,
+      helpText: DEFAULT_INSTRUCT_HELP,
+      debugDivs: false,
+    }
+    Object.assign(params, options) // merge options into params
+    Object.assign(this, params) // assign parameters to instance variables
+
+
+    this.div = $("<div>").css({
+      position: "relative",
+      width: "100%",
+      border: this.debugDivs ? "1px solid black" : "none",
+    })
+
+    this.btnHelp = $("<button>")
+      .appendTo(this.div)
+      .addClass("btn-help")
+      .text("?")
+      .css({
+        position: "absolute",
+        right: "0px",
+        top: "10px",
+      })
+      .click(async () => {
+        await Swal.fire({
+          title: "Help",
+          html: this.helpText,
+          icon: "info",
+          confirmButtonText: "Got it!",
+        })
+      })
+
+    this.top = $("<div>")
+      .css({
+        position: "relative",
+        margin: "auto",
+        minHeight: this.promptHeight,
+        width: this.promptWidth,
+        marginTop: "10px",
+        marginBottom: "20px",
+        border: this.debugDivs ? "1px solid red" : "none",
+      })
+      .appendTo(this.div)
+
+    this.btnPrev = $("<button>")
+      .addClass("btn")
+      .text("<<")
+      .css({
+        position: "absolute",
+        top: "20px",
+        left: "-80px",
+      })
+      .click(() => this.runPrev())
+      .prop("disabled", true)
+      .appendTo(this.top)
+
+    this.btnNext = $("<button>")
+      .addClass("btn")
+      .text(">>")
+      .css({
+        position: "absolute",
+        top: "20px",
+        right: "-80px",
+      })
+      .click(() => this.runNext())
+      .prop("disabled", true)
+      .appendTo(this.top)
+
+    this.title = $("<h1>").addClass("text").appendTo(this.top)
+
+    this.prompt = $("<div>").addClass("text").appendTo(this.top)
+
+    this.content = $("<div>")
+      .css({
+        width: this.contentWidth,
+        minHeight: this.contentHeight,
+        position: "relative",
+        margin: "auto",
+        padding: "10px",
+        border: this.debugDivs ? "1px solid blue" : "none",
+      })
+      .appendTo(this.div)
+
+    this.stage = 1
+    this.maxStage = 1
+    this.stages = Object.getOwnPropertyNames(Object.getPrototypeOf(this))
+      .filter((f) => f.startsWith("stage"))
+      .map((f) => this[f])
+
+    this.completed = makePromise()
+    this.promises = []
+    this.eventCallbacks = []
+  }
+
+  /**
+   * Attach to a display element
+   * @param {object} display - display element (usually DISPLAY)
+   * @returns {Instructions} this instance for chaining
+   */
+  attach(display) {
+    display.empty()
+    this.div.appendTo(display)
+    return this
+  }
+
+  /**
+   * Run the instructions
+   * @param {object} display - display element (usually DISPLAY)
+   * @param {number} stage - stage number to start on
+   * @returns {Promise} resolves when instructions are completed
+   */
+  async run(display, stage) {
+    if (display) this.attach(display)
+      if (stage == undefined && urlParams.instruct) {
+        stage = urlParams.instruct
+      }
+      if (stage && isNaN(stage)) {
+      // if the stage is not a number, treat it as a name
+      stage =
+        this.stages.findIndex(
+          (s) => s.name === stage || s.name === `stage_${stage}`
+        ) + 1
+    } else if (stage){
+      stage = parseInt(stage)
+    }
+    console.log("stage", stage)
+    this.runStage(stage)
+    await this.completed
+  }
+
+  /**
+   * Set the prompt text
+   * @param {string} md - markdown text
+   */
+  setPrompt(md) {
+    this.prompt.html(markdown(md))
+  }
+
+  /**
+   * Append to the prompt text
+   * @param {string} md - markdown text
+   */
+  appendPrompt(md) {
+    this.prompt.append(markdown(md))
+  }
+
+  /**
+   * Add a button to the prompt and awaits the user to click it
+   * @param {string} text - button text
+   * @param {object} opts - button options, passed to button()
+   * @returns {Promise} resolves when button is clicked
+   */
+  async button(text = "continue", opts = {}) {
+    _.defaults(opts, { delay: 0 })
+    let btn = button(this.prompt, text, opts)
+    await this.registerPromise(btn.clicked)
+    btn.remove()
+  }
+
+  /**
+   * Run a specific stage
+   * @param {number} stage - stage number (1-indexed)
+   */
+  async runStage(stage) {
+    if (stage === undefined) {
+      stage = this.stage
+    } else if (isNaN(stage) || stage < 1 || stage > this.stages.length) {
+      alert("Invalid stage! Resetting to previous stage.")
+      stage = this.stage
+    }
+    this.recordEvent = DATA.eventRecorder('instructions', {
+      stage: this.stages[stage - 1].name,
+    })
+    DATA.save()
+    this.rejectPromises()
+    this.cancelEventCallbacks()
+    this.prompt.empty()
+    this.content.empty()
+    this.maxStage = Math.max(this.maxStage, stage)
+    this.stage = stage
+    this.btnNext.prop("disabled", this.stage >= this.maxStage)
+    this.btnPrev.prop("disabled", this.stage <= 1)
+    this.title.text(`Instructions (${this.stage}/${this.stages.length})`)
+
+    await this.stages[stage - 1].bind(this)()
+    if (this.stage == stage) {
+      // check to make sure we didn't already move forward
+      this.enableNext()
+    }
+  }
+
+  runNext() {
+    this.recordEvent("runNext")
+    this.btnNext.removeClass("btn-pulse")
+    if (this.stage == this.stages.length) {
+      this.recordEvent("completed")
+      psiturk.finishInstructions()
+      DATA.save()
+      this.completed.resolve()
+      this.div.remove()
+    } else {
+      this.runStage(this.stage + 1)
+    }
+  }
+
+  runPrev() {
+    this.recordEvent("runPrev")
+    this.runStage(this.stage - 1)
+  }
+
+  enableNext() {
+    this.btnNext.addClass("btn-pulse")
+    this.maxStage = this.stage + 1
+    this.btnNext.prop("disabled", false)
+  }
+
+  /**
+   * Register a promise to be rejected when stage changes
+   * @param {Promise} promise - promise to register
+   * @returns {Promise} the registered promise
+   */
+  registerPromise(promise) {
+    if (!promise.reject) {
+      assert(false, "promise must have reject method")
+    }
+    this.promises.push(promise)
+    return promise
+  }
+
+  /**
+   * Create and register an event promise (see registerPromise and eventPromise)
+   * Using this wrapper ensures that promises are automatically removed when the stage changes
+   * @param {...any} args - arguments for eventPromise
+   * @returns {Promise} the registered event promise
+   */
+  eventPromise(...args) {
+    return this.registerPromise(EVENTS.promise(...args))
+  }
+
+  /**
+   * Create and register a sleep promise (see registerPromise)
+   * @param {number} ms - milliseconds to sleep
+   * @returns {Promise} the registered sleep promise
+   */
+  sleep(ms) {
+    return this.registerPromise(sleep(ms))
+  }
+
+  /**
+   * Register an event callback (see registerEventCallback)
+   * Using this wrapper ensures that callbacks are automatically removed when the stage changes
+   * @param {Function} callback - event callback to register
+   */
+  onEvent(event, callback) {
+    this.eventCallbacks.push([event, callback])
+    EVENTS.on(event, callback)
+  }
+
+  /**
+   * Reject all registered promises
+   */
+  rejectPromises() {
+    for (const promise of this.promises) {
+      promise.reject()
+    }
+    this.promises = []
+  }
+
+  /**
+   * Cancel all registered event callbacks
+   */
+  cancelEventCallbacks() {
+    for (const [event, callback] of this.eventCallbacks) {
+      EVENTS.off(event, callback)
+    }
+    this.eventCallbacks = []
+  }
+}
 
 class TopBar {
   constructor(options = {}) {
@@ -607,7 +608,7 @@ class TopBar {
       width: 1100,
       height: 100,
       help: "",
-      bonus: undefined,
+      showPoints: false,
     })
     Object.assign(this, options)
 
@@ -634,18 +635,16 @@ class TopBar {
       this.setCounter(this.count)
     }
 
-    if (this.bonus) {
-      this.bonusText = $("<div>")
+    if (this.showPoints) {
+      this.pointsText = $("<div>")
         .css({
           "font-weight": "bold",
           "font-size": "16pt",
         })
         .appendTo(this.div)
-        .text(`Points: ${this.bonus.points}`)
-      registerEventCallback((data) => {
-        if (data.event == "bonus.addPoints") {
-          this.bonusText.text(`Points: ${data.total}`)
-        }
+        .text(`Points: 0`)
+      EVENTS.on("bonus.addPoints", (event, data) => {
+        this.pointsText.text(`Points: ${data.total}`)
       })
     }
 
@@ -655,6 +654,7 @@ class TopBar {
         .addClass("btn-help")
         .text("?")
         .click(async () => {
+          DATA.recordEvent("experiment.help")
           await Swal.fire({
             title: "Instructions",
             html: this.help,
@@ -875,7 +875,7 @@ class Canvas {
 
 //#endregion
 
-//#region EXPERIMENT ASSIGNMENT ************************************************
+//#region EXPERIMENT LOGIC ************************************************
 
 class ConditionBuilder {
   constructor(condition) {
@@ -933,7 +933,7 @@ class Bonus {
   }
   addPoints(points) {
     this.points += points
-    logEvent("bonus.addPoints", { points, total: this.points })
+    DATA.recordEvent("bonus.addPoints", { points, total: this.points })
   }
   dollars() {
     let cents = Math.max(0, Math.round(this.points / this.points_per_cent))
@@ -958,12 +958,25 @@ class Bonus {
 function randomUUID() {
   return Date.now() + Math.random().toString(36).substring(2)
 }
+const _uniqueID = new Map()
+function makeUniqueID(prefix, {alwaysPostfix = false} = {}) {
+  if (!_uniqueID.has(prefix)) {
+    _uniqueID.set(prefix, 0)
+    return alwaysPostfix ? `${prefix}-1` : prefix
+  }
+  let id = _uniqueID.get(prefix)
+  _uniqueID.set(prefix, id + 1)
+  return `${prefix}-${id + 1}`
+}
 
 function uniformRandom(min, max) {
   return min + Math.random() * (max - min)
 }
 
 function numString(n, noun, options = {}) {
+  if (n > 10) {
+    return `${n} ${noun}s`
+  }
   if (options.skip_one && n == 1) return noun
   let res = [
     "zero",
@@ -1139,3 +1152,6 @@ function assert(val, msg = "(no details)") {
   }
   return val
 }
+
+
+

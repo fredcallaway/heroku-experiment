@@ -1,7 +1,8 @@
 
 
 class ExampleInstructions extends Instructions {
-  constructor(options = {}) {
+  constructor(options = {promptHeight: 150}) {
+    // options.debugDivs = true
     super(options)
 
     if (!PARAMS.showSecretStage) {
@@ -9,6 +10,7 @@ class ExampleInstructions extends Instructions {
         return stage.name != "stage_conditional"
       })
     }
+    window.instruct = this
   }
 
   // the stages run in the order that they're defined
@@ -47,12 +49,12 @@ class ExampleInstructions extends Instructions {
 
     let radio = new RadioButtons({
       choices: ["yes", "no"],
-      name: "answer okay",
+      name: "instruct.okay",
     }).appendTo(this.prompt)
 
     // we wait for user input before continuing
     // promise() always returns a Promise (something you can await)
-    let click = this.registerPromise(radio.promise())
+    let click = await this.registerPromise(radio.promise())
     // buttons() is a jquery selector so you can use any jquery magic you want here
     radio.buttons().prop("disabled", true)
     // in general, all interactions with the classes in inputs.js
@@ -65,26 +67,37 @@ class ExampleInstructions extends Instructions {
     }
   }
 
-  async stage_1_badly_named() {
+  async stage_alerts() {
     this.setPrompt("Sometimes there will be fun alerts!")
     await this.button("...")
     await alert_success() // wait for confirm
   }
 
-  async stage_content() {
+  async stage_practice() {
     this.setPrompt("We might embed the task into the instructions.")
-    $("<div>")
-      .css({
-        margin: "auto",
-        width: "800px",
-        height: "300px",
-        border: "3px solid black",
-        textAlign: "center",
-        fontWeight: "bold",
-        paddingTop: "30px",
-      })
-      .html("404 Task Not Found")
-      .appendTo(this.content)
+    await this.button()
+    this.setPrompt("Here, the task is to click on the black circles as quickly as you can.")
+    this.onEvent("task.hit", () => {
+      this.prompt.append("Nice! ")
+    })
+    let task = new ExampleTask({nRound: 3, trialID: "practice1"})
+    await task.run(this.content)
+    this.runNext()  // don't make them click the arrow
+  }
+  
+  async stage_practice_hard() {
+    this.setPrompt("Try it again!")
+    this.onEvent("task.hit", () => {
+      this.prompt.append("Sweet! ")
+    })
+    this.onEvent("task.miss", () => {
+      this.prompt.append("So close! ")
+    })
+    this.onEvent("task.timeout", () => {
+      this.prompt.append("Too slow! ")
+    })
+    let task = new ExampleTask({nRound: 3, timeout: 700, targetSize: 10, trialID: "practice2"})
+    await task.run(this.content)
   }
 
   async stage_final() {
@@ -92,6 +105,9 @@ class ExampleInstructions extends Instructions {
 
     this.setPrompt(`
       In the rest of the experiment, yada yada...
+
+      You will also earn points for each task you complete.
+      ${BONUS.describeScheme()}
 
       <br><br>
       <div class="alert alert-danger">

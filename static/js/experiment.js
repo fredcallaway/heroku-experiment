@@ -16,27 +16,26 @@ const BONUS = new Bonus({
   points_per_cent: 100,
   initial: 0,
 })
-registerEventCallback((data) => {
-  if (data.event == "task.hit") {
-    BONUS.addPoints(10)
-  }
-})
 
 // this allows passing condition params with URL parameters e.g. &showSecretStage=true
 updateExisting(PARAMS, urlParams)
 
-// use recordData to record any information you want to have in participants.csv
-// the "params" key is special, and will be flattened in fetch_data.py
-recordData('params', PARAMS);
-recordData('very important key', 'critical value');
+// use DATA.setKeyValue to record high-level summary information
+// it will be saved in data/{experiment_code_version}/participants.csv
+// the "params" key is special, and will be flattened into separate columns
+DATA.setKeyValue('params', PARAMS)
+DATA.setKeyValue('very important key', 'critical value')
 
 // This is the main function that runs after the setup finishes
 async function runExperiment() {
-  // stimuli = await $.getJSON(`static/json/${CONDITION}.json`)
-
-  // use logEvent to record anything that happens in the experiment
-  // which you might want to know about later
-  logEvent('experiment.initialize', {CONDITION, PARAMS})
+  // You might want to define separate configurations for each condition
+  // this could include parameters, stimuli, trial definitions etc.
+  // const config = await $.getJSON(`static/json/${CONDITION}.json`)
+  
+  // use DATA.recordEvent to record everything that happens in the experiment that you
+  // could conceivably want to know about later. When in doubt, record it!
+  // the info will be saved in data/{experiment_code_version}/events/{participant_id}.json
+  DATA.recordEvent('experiment.initialize', {CONDITION, PARAMS})
   enforceScreenSize(1200, 750)
 
   // I like to break down the experiment into blocks, each of which is an async function
@@ -46,6 +45,11 @@ async function runExperiment() {
 
   async function main() {
     DISPLAY.empty() // make sure the page is clear
+
+    // Every time the task.hit event is recorded, add 10 points to the bonus
+    EVENTS.on("task.hit", (event, data) => {
+      BONUS.addPoints(10)
+    })
 
     let trials = [
       {timeout: 3000, targetSize: 20},
@@ -58,7 +62,7 @@ async function runExperiment() {
       nTrial: trials.length,
       height: 70,
       width: 900,
-      bonus: BONUS,
+      showPoints: true,
       help: `
         Click on the black circles as quickly as you can.
       `
@@ -71,18 +75,14 @@ async function runExperiment() {
       // or in a separate file (make sure to include it in exp.html)
       // workspace.empty()
       let outcome = await new ExampleTask(trial).run(workspace)
-      if (outcome == "win") {
-        BONUS.addPoints(50)
-      }
 
-      await sleep(1000)
       top.incrementCounter()
-      saveData() // this sends the data to the database, optional (will increase server load)
+      DATA.save() // this sends the data to the database, optional (will increase server load)
     }
   }
 
   async function debrief() {
-    recordData('bonus', 1.50); // this can be doled out automatically with bin/prolific.py
+    DATA.setKeyValue('bonus', 1.50); // this can be doled out automatically with bin/prolific.py
     DISPLAY.empty()
     let div = $('<div>').appendTo(DISPLAY).addClass('text')
     $('<p>').appendTo(div).html(markdown(`
@@ -101,7 +101,7 @@ async function runExperiment() {
 
     await button(div, 'submit').clicked
     // this information is already in the log, but let's put it in one place
-    logEvent('debrief.submitted', getInputValues({difficulty, feedback}))
+    DATA.recordEvent('debrief.submitted', getInputValues({difficulty, feedback}))
   }
 
   // using runTimeline is optional, but it allows you to jump to different blocks
