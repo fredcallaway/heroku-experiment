@@ -37,6 +37,8 @@ async function runExperiment() {
   // the info will be saved in data/{experiment_code_version}/events/{participant_id}.json
   DATA.recordEvent('experiment.initialize', {CONDITION, PARAMS})
   enforceScreenSize(1200, 750)
+  // Note: If you choose to use the Component structure (as we do in this example template)
+  // then you will use this.recordEvent() instead. See task.js for an example.
 
   // I like to break down the experiment into blocks, each of which is an async function
   async function instructions() {
@@ -58,7 +60,7 @@ async function runExperiment() {
     ]
     // convenience class that handles a round number incrementer
     // optionally you can provide help text which will make a question button on the right
-    let top = new TopBar({
+    let top = new StatusBar({
       nTrial: trials.length,
       height: 70,
       width: 900,
@@ -71,18 +73,19 @@ async function runExperiment() {
     let workspace = $('<div>').appendTo(DISPLAY)
 
     for (let trial of trials) {
-      // you will probably want to define a more interesting task here
-      // or in a separate file (make sure to include it in exp.html)
-      // workspace.empty()
       let outcome = await new ExampleTask(trial).run(workspace)
+      console.log("outcome", outcome) // this is just to show you that you can get the outcome
 
       top.incrementCounter()
       DATA.save() // this sends the data to the database, optional (will increase server load)
     }
   }
 
+  async function survey() {
+    await new SurveyTrial(EXAMPLE_SURVEY).run(DISPLAY)
+  }
+
   async function debrief() {
-    DATA.setKeyValue('bonus', 1.50); // this can be doled out automatically with bin/prolific.py
     DISPLAY.empty()
     let div = $('<div>').appendTo(DISPLAY).addClass('text')
     $('<p>').appendTo(div).html(markdown(`
@@ -99,7 +102,7 @@ async function runExperiment() {
       Do you have any other feedback? (optional)
     `)
 
-    await button(div, 'submit').clicked
+    await button(div, 'submit').promise()
     // this information is already in the log, but let's put it in one place
     DATA.recordEvent('debrief.submitted', getInputValues({difficulty, feedback}))
   }
@@ -109,6 +112,7 @@ async function runExperiment() {
   await runTimeline(
     instructions,
     main,
+    survey,
     debrief
   )
 };

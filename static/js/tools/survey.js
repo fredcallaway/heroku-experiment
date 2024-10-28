@@ -51,9 +51,9 @@ const EXAMPLE_SURVEY = {
 class SurveyTrial {
   constructor(json) {
     window.ST = this
-    logEvent('survey.construct', {json})
+    DATA.recordEvent('survey.construct', {json})
     this.survey = new Survey.Model(json);
-    this.results = makePromise()
+    this.results = deferredPromise()
     this.survey.onComplete.add((sender) => this.results.resolve(sender.data));
 
     this.width = 1000
@@ -75,12 +75,12 @@ class SurveyTrial {
   }
 
   async run(element) {
-    logEvent('survey.run')
+    DATA.recordEvent('survey.run')
     element.empty()
     this.el.appendTo(element)
     this.survey.render('_survey_target');
     let results = await this.results
-    logEvent('survey.results', {results})
+    DATA.recordEvent('survey.results', {results})
   }
 }
 

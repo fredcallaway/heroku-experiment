@@ -42,7 +42,7 @@ const EVENTS = {
   },
 
   promise(event, predicate=(event, data) => true) {
-    const promise = makePromise()
+    const promise = deferredPromise()
     const wrapper = (event, data) => {
       if (predicate(event, data)) {
         this.off(event, wrapper)
@@ -90,10 +90,12 @@ const DATA = {
   events: [],
 
   // Stores a key-value pair
-  setKeyValue(key, value) {
-    this.recordEvent('data.setKeyValue', {key, value})
-    if (this.keyValues.has(key)) {
-      console.log(`WARNING: setKeyValue has overwritten ${key}`)
+  setKeyValue(key, value, quiet=false) {
+    if (!quiet) {
+      this.recordEvent('data.setKeyValue', {key, value})
+      if (this.keyValues.has(key)) {
+        console.log(`WARNING: setKeyValue has overwritten ${key}`)
+      }
     }
     this.keyValues.set(key, value)
     psiturk.recordUnstructuredData(key, value)
@@ -101,6 +103,9 @@ const DATA = {
 
   // Records an event and emits it to custom listeners
   recordEvent(event, data={}) {
+    if (typeof data != "object") {
+      data = {data}
+    }
     if (data.timestamp === undefined) {
       data.timestamp = Date.now()
     }
@@ -167,7 +172,7 @@ $(window).on('load', async () => {
   if (local) {
     $('#display').empty()
     await runExperiment()
-    $('#display').empty()
+    showCompletionScreen()
   } else {
     await DATA.save()
     if (mode == 'live') {

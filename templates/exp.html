@@ -13,13 +13,7 @@
         <meta charset="utf-8">
         <link rel="Favicon" href="static/favicon.ico" />
 
-        <!-- Standard requirements -->
-        <script src="static/lib/jquery-min.js" type="text/javascript"> </script>
-        <script src="static/lib/lodash-min.js" type="text/javascript"> </script>
-        <script src="static/lib/backbone-min.js" type="text/javascript"> </script>
-        <script src="static/lib/d3.v3.min.js" type="text/javascript"> </script>
-
-        <!-- psiTurk -->
+        <!-- get template variables (from psiturk)  -->
         <script type="text/javascript">
             // These fields provided by the psiTurk Server
             var uniqueId = "{{ uniqueId }}";  // a unique string identifying the worker/task
@@ -28,6 +22,12 @@
             var adServerLoc = "{{ adServerLoc }}"; // the location of your ad (so you can send user back at end of experiment)
             var mode = "{{ mode }}";
         </script>
+
+        <!-- base psiturk requirements -->
+        <script src="static/lib/jquery-min.js" type="text/javascript"> </script>
+        <script src="static/lib/lodash-min.js" type="text/javascript"> </script>
+        <script src="static/lib/backbone-min.js" type="text/javascript"> </script>
+        <script src="static/lib/d3.v3.min.js" type="text/javascript"> </script>
         <script src="static/js/psiturk.js" type="text/javascript"> </script>
 
         <!-- Stylesheets -->
@@ -70,19 +70,29 @@
         </div> -->
     </body>
 
-    <!-- Additional utility libraries -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js" type="text/javascript"></script>
-
-    <!-- My boilerplate and utilities -->
+    <!-- required utilities and boilerplate code -->
     <script src="static/js/utils.js" type="text/javascript"> </script>
-    <script src="static/js/setup.js", type="text/javascript"></script>
+    <script src="static/js/setup.js" , type="text/javascript"></script>
 
+    
+    <!-- OPTIONAL: Core tools and supporting libraries -->
+    <script src="static/js/tools/component.js"></script>
+    <script src="static/js/tools/inputs.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="static/js/tools/alerts.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js" type="text/javascript"></script>
+    <script src="static/js/tools/instructions.js"></script>
+
+    <!-- OPTIONAL: Extra tools that you should only load if you use them -->
     <link href="https://unpkg.com/survey-jquery/defaultV2.min.css" type="text/css" rel="stylesheet">
     <script src="https://unpkg.com/survey-jquery/survey.jquery.min.js"></script>
-    <script src="static/js/survey.js", type="text/javascript"></script>
-
-    <!-- Code for ~this~ experiment -->
+    <script src="static/js/tools/survey.js", type="text/javascript"></script>
+    <script src="static/js/tools/quiz.js"></script>
+    <script src="static/js/tools/canvas.js"></script>
+    <script src="static/js/tools/status-bar.js"></script>
+    <!-- <script src="static/js/tools/gallery.js"></script> -->
+    
+    <!-- Code specific this experiment/example -->
     <script src="static/js/instructions.js" type="text/javascript"></script>
     <script src="static/js/experiment.js", type="text/javascript"></script>
     <script src="static/js/task.js", type="text/javascript"></script>
