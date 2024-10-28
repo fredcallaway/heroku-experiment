@@ -152,9 +152,7 @@ class Instructions extends Component {
       alert("Invalid stage! Resetting to previous stage.")
       stage = this.stage
     }
-    this.recordEvent = DATA.eventRecorder("instructions", {
-      stage: this.stages[stage - 1].name,
-    })
+    this.recordEvent('runStage', {stage})
     DATA.save()
     this.rejectPromises()
     this.cancelEventCallbacks()
