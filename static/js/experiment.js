@@ -1,7 +1,11 @@
 
 // ---------- MAKE SURE TO SET THESE!! ----------
 // ERROR_EMAIL = 'youremail@bodacious.edu'
+// Set either PROLIFIC_CODE or COMPLETION_LINK
 // PROLIFIC_CODE = '6A5FDC7A'
+// COMPLETION_LINK = 'https://example.com/completion'
+// example link for NYU sona
+// nyu-psych.sona-systems.com/webstudy_credit.aspx?experiment_id=XXXXX&credit_token=XXXXX&survey_code=${workerId}
 
 
 // this defines 6 conditions (a 2x3 design)

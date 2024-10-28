@@ -136,6 +136,15 @@ We also provide an alpha-release CLI for Prolific, using the Prolific API. Run `
 
 You'll need to install two additional dependencies for this script: `pip install markdown fire`. Note that if you run this command with the virtual environment active, then you'll need to activate the virtual environment running bin/prolific.py in the future. I recommend installing these packages in your global python environment.
 
+### SONA (or any other platform)
+
+Give participants with this format: `https://<YOUR_APP_DOMAIN>.herokuapp.com/consent?mode=live&workerId=XXXX&hitId=XXXXX&assignmentId=XXXXX`. You can set hitId and assignmentId however you want. The critical thing is to make sure workerId is unique for each participant, so as not to overwrite data.
+
+This has not been tested, but you should be able to redirect participants to SONA at the end of the experiment if you set the COMPLETION_LINK variable. For example, at NYU we would use something like this (changing the XXXX of course)
+```js
+COMPLETION_LINK = `nyu-psych.sona-systems.com/webstudy_credit.aspx?experiment_id=XXXX&credit_token=XXXX&survey_code=${workerId}`
+```
+
 ### MTurk
 
 I haven't used MTurk in a while, so I'm not sure this actually works, but...
@@ -156,7 +165,6 @@ If you want to "download" data from the local participants.db database (if you w
 ### Preprocessing data
 
 If you run `bin/fetch_data.py --process`, the script will also create a directory data/process/[codeversion]/ with processed CSV files. The preprocessing is defined in bin/preprocessing.py. Obviously, you'll need to adjust this file to reflect the structure of your own experiment. However, if you implement your task using the `Component` class, you will be able to reuse a lot of this code.
-
 
 ## Additional Tips
 

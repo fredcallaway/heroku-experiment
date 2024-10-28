@@ -1,10 +1,11 @@
 var ERROR_EMAIL = 'EMAIL NOT FOUND' // I really hope you set this in experiment.js
-var PROLIFIC_CODE = 'CODE NOT FOUND' // I really hope you set this in experiment.js
+var PROLIFIC_CODE = null
+var COMPLETION_LINK = null
 
-_.compose = _.flowRight  // for psiturk
+https: _.compose = _.flowRight  // for psiturk
 const psiturk = new PsiTurk(uniqueId, adServerLoc, mode);
 const urlParams = _.mapValues(Object.fromEntries(new URLSearchParams(window.location.search)), maybeJson)
-const prolific = true;
+
 const local = (mode === "demo" || mode === "{{ mode }}")
 
 if (local) {
@@ -244,9 +245,9 @@ function completeExperiment() {
 async function showCompletionScreen() {
   DATA.recordEvent('experiment.completion')
   $('#display').empty();
-  if (prolific) {
-    $("#load-icon").remove();
-    $(window).off("beforeunload");
+  $("#load-icon").remove();
+  $(window).off("beforeunload");
+  if (PROLIFIC_CODE) {
     $('#display').html(`
       <div class='basic-content'>
         <h1>Thanks!</h1>
@@ -256,14 +257,40 @@ async function showCompletionScreen() {
         </a></p>
       </div>
     `);
-  }
+  } else if (COMPLETION_LINK) {
+    $('#display').html(`
+      <div class='basic-content'>
+      <h1>Thanks!</h1>
+      <div class="legal well">
+          <p>
+          Click this link to submit:
+          <a href=${COMPLETION_LINK}>
+              Submit here!
+          </a>
+          <p>
+      </div>
+      </div>
+    `) 
+    } else {
+      $("#display").html(`
+      <div class='basic-content'>
+      <h1>Thanks!</h1>
+      <div class="legal well">
+          <p>
+          You should probably be seeing a page with a completion link right now.
+          Please contact the experimenter, providing your participant ID: <b>${workerId}</b>
+          <p>
+      </div>
+      </div>
+    `)
+    }
 };
 
 function handleError(e) {
   let msg = e.stack?.length > 10 ? e.stack : `${e}`;
   const workerIdMessage = typeof workerId !== "undefined" && workerId !== null ? workerId : 'N/A';
   DATA.recordEvent('experiment.error', {msg})
-  const message = `Prolific Id: ${workerIdMessage}\n${msg}`;
+  const message = `Participant Id: ${workerIdMessage}\n${msg}`;
   const link = `<a href="mailto:${ERROR_EMAIL}?subject=ERROR in experiment&body=${encodeURIComponent(message)}">Click here</a> to report the error by email.`;
 
   $('#display').html(`
