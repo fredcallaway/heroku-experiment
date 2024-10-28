@@ -76,13 +76,14 @@ class ExampleInstructions extends Instructions {
     this.setPrompt(`
       You might have to answer questions too. Is that okay?
     `)
-
+    
+    // you can use the class constructor or convenience function as you prefer
     let radio = new RadioButtons({
       choices: ["yes", "no"],
       name: "instruct.okay", // this will be the event name, for easier data processing
     }).appendTo(this.prompt)
 
-    // we wait for user input before continuing
+    // wait for user input before continuing
     // promise() always returns a Promise (something you can await)
     let click = await radio.promise()
     // inputSelector() is a jquery selector so you can use any jquery magic you want here
@@ -131,7 +132,7 @@ class ExampleInstructions extends Instructions {
       if (result == "hit") {
         break
       } else {
-        await sleep(1000)
+        await this.sleep(1000)
         this.setPrompt("Try again. Click on the black circle.")
       }
     }
@@ -142,6 +143,10 @@ class ExampleInstructions extends Instructions {
 
   async stage_hard() {
     this.setPrompt("Try it again!")
+    // This is an example of using the event dispatcher (EVENTS)
+    // You can do this for any event that is triggered by DATA.recordEvent
+    // You can also get a promise that resolves when an event occurs 
+    // with this.eventPromise() or EVENTS.promise()
     this.onEvent("task.hit", () => {
       this.prompt.append("Sweet! ")
     })
@@ -157,7 +162,9 @@ class ExampleInstructions extends Instructions {
       targetSize: 10,
       trialID: "hard",
     })
-    await task.run(this.content)
+    // it's critical to use registerPromise here to make sure that the component
+    // is properly cancelled if the user navigates away from the stage
+    await this.registerPromise(task.run(this.content))
   }
 
   async stage_quiz() {
@@ -165,14 +172,15 @@ class ExampleInstructions extends Instructions {
       You can also embed quizzes into the instructions. This ensures that the
       participants have read the instructions carefully.
     `)
+    // we assign the quiz to a property so that the state is preserved 
+    // when the user navigates between stages (to check for answers)
     this.quiz = this.quiz ?? new Quiz(`
       # What is the airspeed velocity of an unladen swallow?
       - 20.1 miles per hour
       * An African or European swallow?
     `)
     
-    this.quiz.appendTo(this.prompt)
-    await this.quiz.run()
+    await this.registerPromise(this.quiz.run(this.prompt))
     this.runNext()
   }
 

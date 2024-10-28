@@ -10,15 +10,16 @@
 const PARAMS = conditionParameters(CONDITION, {
   showSecretStage: [false, true],
   anotherParameter: [1, 2, 3],
-})
-
-const BONUS = new Bonus({
   points_per_cent: 100,
-  initial: 0,
 })
 
 // this allows passing condition params with URL parameters e.g. &showSecretStage=true
 updateExisting(PARAMS, urlParams)
+
+const BONUS = new Bonus({
+  points_per_cent: PARAMS.points_per_cent,
+  initial: 0,
+})
 
 // use DATA.setKeyValue to record high-level summary information
 // it will be saved in data/{experiment_code_version}/participants.csv
@@ -36,19 +37,23 @@ async function runExperiment() {
   // could conceivably want to know about later. When in doubt, record it!
   // the info will be saved in data/{experiment_code_version}/events/{participant_id}.json
   DATA.recordEvent('experiment.initialize', {CONDITION, PARAMS})
-  enforceScreenSize(1200, 750)
   // Note: If you choose to use the Component structure (as we do in this example template)
   // then you will use this.recordEvent() instead. See task.js for an example.
+  
+  // Make sure the participant's screen is big enough to display the full task interface
+  enforceScreenSize(1200, 750)
 
   // I like to break down the experiment into blocks, each of which is an async function
   async function instructions() {
-    await new ExampleInstructions().run(DISPLAY)
+    await new ExampleInstructions(PARAMS).run(DISPLAY)
   }
 
   async function main() {
     DISPLAY.empty() // make sure the page is clear
 
     // Every time the task.hit event is recorded, add 10 points to the bonus
+    // Note: all DATA.recordEvent calls trigger events, and you can assign handlers to any of them
+    // You can also use EVENTS.once() to trigger an event once, or EVENTS.promise() to wait for an event to occur
     EVENTS.on("task.hit", (event, data) => {
       BONUS.addPoints(10)
     })
