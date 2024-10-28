@@ -48,18 +48,16 @@ const EXAMPLE_SURVEY = {
 
 
 
-class SurveyTrial {
-  constructor(json) {
-    window.ST = this
-    DATA.recordEvent('survey.construct', {json})
+class SurveyComponent extends Component {
+  constructor(json, options={}) {
+    super({
+      eventPrefix: 'survey',
+      width: 1000,
+      ...options,
+    })
+    this.recordEvent('initialize', {json})
     this.survey = new Survey.Model(json);
-    this.results = deferredPromise()
-    this.survey.onComplete.add((sender) => this.results.resolve(sender.data));
-
-    this.width = 1000
-
-    this.el = $('<div>', {id: '_survey_target'})
-    .css({width: this.width, margin: 'auto'})
+    this.div.attr('id', '_survey_target').css({width: this.width, margin: 'auto'})
 
     // Enable markdown in questions
     let converter = new showdown.Converter();
@@ -73,14 +71,12 @@ class SurveyTrial {
       options.html = str;
     });
   }
-
-  async run(element) {
-    DATA.recordEvent('survey.run')
-    element.empty()
-    this.el.appendTo(element)
+  async _run() {
     this.survey.render('_survey_target');
-    let results = await this.results
-    DATA.recordEvent('survey.results', {results})
+    const data = deferredPromise()
+    this.survey.onComplete.add((sender) => data.resolve(sender.data));
+    let results = await data
+    return {results}
   }
 }
 

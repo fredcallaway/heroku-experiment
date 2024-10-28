@@ -87,7 +87,7 @@ async function runExperiment() {
   }
 
   async function survey() {
-    await new SurveyTrial(EXAMPLE_SURVEY).run(DISPLAY)
+    await new SurveyComponent(EXAMPLE_SURVEY).run(DISPLAY)
   }
 
   async function debrief() {
