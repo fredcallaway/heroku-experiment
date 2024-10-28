@@ -126,31 +126,28 @@ const DATA = {
   },
 
   // Saves data to the server or resolves immediately in local/demo mode
-  save() {
-    return new Promise((resolve, reject) => {
-      if (local || mode === 'demo') {
-        this.recordEvent('data.dummy_attempt')  // don't try to contact database in local mode
-        resolve('local');
-        return;
-      }
-      this.recordEvent('data.attempt')
-      const timeout = delay(10000, () => {
-        this.recordEvent('data.timeout')
-        reject('timeout');
-      });
+  async save() {
+    if (local || mode === "demo") {
+      this.recordEvent("data.attempt (local mode: not saving!)")
+      return "local"
+    }
+
+    this.recordEvent('data.attempt')
+    const promise = new Promise((resolve) => {
       psiturk.saveData({
-        error: () => {
-          clearTimeout(timeout);
-          this.recordEvent('data.error')
-          reject('error');
-        },
-        success: () => {
-          clearTimeout(timeout);
-          this.recordEvent('data.success')
-          resolve();
-        }
-      });
-    });
+        error: () => resolve("error"),
+        success: () => resolve("success")
+      })
+    })
+
+    let result = await Promise.race([promise, sleep(10000, 'timeout')])
+    if (result == "success") {
+      this.recordEvent("data.success")
+      return "success"
+    } else {
+      this.recordEvent(`data.${result}`)
+      throw new Error(`data.${result}`)
+    }
   }
 }
 

@@ -17,7 +17,7 @@ class Component {
       options.eventPrefix || this.eventPrefix || this.constructor.name
     this.uniqueID =
       options.uniqueID ||
-      makeUniqueID(this.eventPrefix, { alwaysPostfix: true })
+      makeUniqueID(this.id ?? this.eventPrefix, { alwaysPostfix: true })
     this.promises = []
     this.eventCallbacks = []
   }

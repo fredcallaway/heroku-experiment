@@ -121,7 +121,7 @@ class ExampleInstructions extends Instructions {
       You can embed the task into the instructions. This is usually a good way
       to introduce the task to participants.
     `)
-    let task = new ExampleTask({ nRound: 3, trialID: "introduce_task", timeout: 10000})
+    let task = new ExampleTask({ nRound: 3, id: "introduce_task", timeout: 10000})
     task.attach(this.content)
 
     await this.continue()
@@ -160,7 +160,7 @@ class ExampleInstructions extends Instructions {
       nRound: 8,
       timeout: 1000,
       targetSize: 10,
-      trialID: "hard",
+      id: "hard",
     })
     // it's critical to use registerPromise here to make sure that the component
     // is properly cancelled if the user navigates away from the stage

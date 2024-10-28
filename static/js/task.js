@@ -71,13 +71,13 @@ class ExampleTask extends Component {
     if (result != "timeout") {
       let { x, y } = result
       if (this.isHit(x, y)) {
-        this.recordEvent("hit")
+        this.recordEvent("hit", {x, y})
         this.drawTarget("green")
         await this.sleep(300)
         this.canvas.clear()
         return "hit"
       } else {
-        this.recordEvent("miss")
+        this.recordEvent("miss", {x, y})
         this.canvas.drawCross(x, y, 5, "red")
         return "miss"
       }
