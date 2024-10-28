@@ -100,12 +100,6 @@ It's up to you how you want to handle data representation. Frameworks like jsPsy
 - The data will be saved to the local participants.db sqlite database.
 - See the "Downloading Data" section below for details.
 
-### Preprocessing data
-
-The downside of using event-based data recording is that the data you save requires more preprocessing than a standard one-object-per-trial format. However, it's really not so bad as long as you mark all the events from each trial with a uniqueID (this will happen automatically if you implement your task as a `Component`). Basically, you just filter the long list of events for those that come from your trial (in the example, they start with `task.`). Then you group by uniqueID. You now have a short list of events that contain all the information you'd ever need about each trial trial.
-
-_TODO: add an example python script for preprocessing the data._
-
 ### Optional tools
 
 I have included general-purpose tools in the static/js/tools/ directory. 
@@ -157,6 +151,11 @@ You will find the data in `data/raw/[codeversion]/events/`. There is one file pe
 **What if you don't see the data?** If you're looking for data that you generated while testing, make sure you used the /test URL as described above.
 
 If you want to "download" data from the local participants.db database (if you were testing using `make dev`, not on the live heroku page), then use `bin/fetch_data.py --local`. If you want to include data you generated while testing the heroku site (using the /test URL), then use the `--debug` flag. By default, `bin/fetch_data.py` will not download data with "debug" in the workerId or assignmentId.
+
+
+### Preprocessing data
+
+If you run `bin/fetch_data.py --process`, the script will also create a directory data/process/[codeversion]/ with processed CSV files. The preprocessing is defined in bin/preprocessing.py. Obviously, you'll need to adjust this file to reflect the structure of your own experiment. However, if you implement your task using the `Component` class, you will be able to reuse a lot of this code.
 
 
 ## Additional Tips

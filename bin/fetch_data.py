@@ -2,12 +2,12 @@
 
 import os
 import subprocess
-import logging
-import requests
-from requests.auth import HTTPBasicAuth
 from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 import hashlib
 import json
+import glob
+import csv
+from preprocessing import DataProcessor
 
 # set environment parameters so that we use the remote database
 
@@ -38,9 +38,13 @@ class Anonymizer(object):
 def pick(obj, keys):
     return {k: obj.get(k, None) for k in keys}
 
-import csv
 def write_csv(file, data, header=True):
-    keys = set().union(*(d.keys() for d in data))
+    # Preserve order from first dict and add any new keys from subsequent dicts
+    keys = list(data[0].keys())
+    for d in data[1:]:
+        for k in d.keys():
+            if k not in keys:
+                keys.append(k)
 
     with open(file, 'w', newline='') as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=keys)
@@ -48,6 +52,40 @@ def write_csv(file, data, header=True):
             writer.writeheader()
         for row in data:
             writer.writerow(row)
+
+
+def process_data(version):
+    input_dir = f"data/raw/{version}/events"
+    output_dir = f"data/processed/{version}"
+    os.makedirs(output_dir, exist_ok=True)
+    assert os.path.exists(input_dir), f"Input directory {input_dir} does not exist"
+
+    # Find all parse methods
+    parse_methods = [m for m in dir(DataProcessor) if hasattr(getattr(DataProcessor, m), '_parser'  )]    
+    results = {m: [] for m in parse_methods}
+
+    # Process each JSON file
+    for json_file in glob.glob(f"{input_dir}/*.json"):
+        print(json_file)
+        processor = DataProcessor.load(json_file)
+        
+        for method in parse_methods:
+            results[method].extend(getattr(processor, method)())
+
+    # Save results
+    for method, data in results.items():
+        kind = getattr(processor, method)._parser
+        if kind == 'csv':
+            output_name = method + '.csv'
+            write_csv(f"{output_dir}/{output_name}", data)
+            print(f"Wrote {output_dir}/{output_name}")
+        elif kind == 'json':
+            output_name = method + '.json'
+            with open(f"{output_dir}/{output_name}", 'w') as f:
+                json.dump(data, f)
+            print(f"Wrote {output_dir}/{output_name}")
+
+
 
 def write_data(version, mode):
     anonymize = Anonymizer(enabled = mode == 'live')
@@ -77,10 +115,7 @@ def write_data(version, mode):
     for p in ps:
         if p.datastring is None:
             continue
-        try:
-            datastring = json.loads(p.datastring)
-        except:
-            import IPython, time; IPython.embed(); time.sleep(0.5)
+        datastring = json.loads(p.datastring)
 
         wid = anonymize(p.workerid)
 
@@ -129,6 +164,8 @@ if __name__ == "__main__":
               "data was collected."))
     parser.add_argument("--debug", help="Keep debug participants", action="store_true")
     parser.add_argument("--local", help="Use local database (implies --debug)", action="store_true")
+    parser.add_argument("--nofetch", help="Skip fetching data", action="store_true")
+    parser.add_argument("--process", help="Process the data", action="store_true")
 
     args = parser.parse_args()
     mode = 'local' if args.local else 'debug' if args.debug else 'live'
@@ -139,6 +176,9 @@ if __name__ == "__main__":
         c = configparser.ConfigParser()
         c.read('config.txt')
         version = c["Task Parameters"]["experiment_code_version"]
-        print("Fetching data for current version: ", version)
+        print("Using current version: ", version)
 
-    write_data(version, mode)
+    if not args.nofetch:
+        write_data(version, mode)
+    if args.process:
+        process_data(version)
