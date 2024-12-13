@@ -16,9 +16,21 @@ flexible (and less error-prone) event-based data-recording system.
 
 Make sure you have all of these installed before continuing:
 
-- Python 3.9+ 
+- Python 3.9 - 3.11 *see note below*
 - Postgres: https://www.postgresql.org/download/ or `brew install postgresql`
 - Heroku CLI: https://devcenter.heroku.com/articles/heroku-cli
+
+
+#### Python version
+
+Currently, the package does ***not*** work with Python 3.12 due to the removal
+of the six library. You'll need to use Python 3.11 if you want to test the server
+locally (which is necessary to test data saving and loading). 
+[pyenv](https://github.com/pyenv/pyenv?tab=readme-ov-file#installation) 
+is one easy way to do this. After installing it, run `pyenv local 3.11`,
+and pyenv will automatically use this python version in this directory
+(if it doesn't work, check `python --version` and `which python`; it should
+print "$HOME/.pyenv/shims/python").
 
 ### Installation
 
@@ -141,6 +153,7 @@ You'll need to install two additional dependencies for this script: `pip install
 Give participants with this format: `https://<YOUR_APP_DOMAIN>.herokuapp.com/consent?mode=live&workerId=XXXX&hitId=XXXXX&assignmentId=XXXXX`. You can set hitId and assignmentId however you want. The critical thing is to make sure workerId is unique for each participant, so as not to overwrite data.
 
 This has not been tested, but you should be able to redirect participants to SONA at the end of the experiment if you set the COMPLETION_LINK variable. For example, at NYU we would use something like this (changing the XXXX of course)
+
 ```js
 COMPLETION_LINK = `nyu-psych.sona-systems.com/webstudy_credit.aspx?experiment_id=XXXX&credit_token=XXXX&survey_code=${workerId}`
 ```
