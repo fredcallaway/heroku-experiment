@@ -1,0 +1,39 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "shell",
+			"label": "Deploy to Heroku",
+			"command": "git",
+			"args": [
+				"push",
+				"-f",
+				"heroku",
+				"HEAD:master"
+			],
+			"group": "build",
+			"presentation": {
+				"reveal": "always",
+				"panel": "shared"
+			},
+			"problemMatcher": []
+		},
+		{
+			"type": "shell",
+			"label": "Deploy to Prolific",
+			"dependsOn": ["Deploy to Heroku"],
+			"command": "python",
+			"args": [
+				"bin/prolific.py",
+				"post_duplicate",
+				"--yes"
+			],
+			"group": "build",
+			"presentation": {
+				"reveal": "always",
+				"panel": "shared"
+			},
+			"problemMatcher": []
+		},
+	]
+}
