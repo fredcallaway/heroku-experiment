@@ -12,6 +12,10 @@ flexible (and less error-prone) event-based data-recording system.
 
 ## Setup
 
+If you haven't already, start by clicking the green "Use this template" on Github to make
+your own repository based on this one. If you don't want to make a repo on GitHub, you can
+also just clone it: `git clone https://github.com/fredcallaway/heroku-experiment`.
+
 ### Dependencies
 
 Make sure you have all of these installed before continuing:
