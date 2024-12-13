@@ -10,6 +10,8 @@ import psiturk.experiment_server as exp
 config = configparser.ConfigParser()
 config.read('config.txt')
 sp = config['Server Parameters']
-print(f'Server listening on ' + sp['host'] + ':' + sp['port'])
+
+host = 'http://localhost' if sp['host'] == '0.0.0.0' else sp['host']
+print(f'Server listening on {host}:{sp["port"]}')
 
 exp.launch()
