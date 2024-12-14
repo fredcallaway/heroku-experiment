@@ -49,7 +49,7 @@ async function runExperiment() {
 
   // I like to break down the experiment into blocks, each of which is an async function
   async function instructions() {
-    await new ExampleInstructions(PARAMS).run(DISPLAY)
+    await new ExampleInstructions({...PARAMS, autoNext: true}).run(DISPLAY)
   }
 
   async function main() {

@@ -40,65 +40,87 @@ class ExampleInstructions extends Instructions {
     this.setPrompt("You will only see this if `PARAMS.showSecretStage` is true")
   }
 
-  async stage_inputs() {
+  async stage_buttons() {
     this.setPrompt(`
       You can make a button.
     `)
-    await this.continue()
-
-    this.setPrompt(`
-      You can even make _two_ buttons!
-    `)
-
-    let div = $("<div>")
-      .appendTo(this.content)
-      .css({ width: 400, margin: "auto" })
-    let choice = await Promise.any([
-      button(div, "left").css("float", "left").promise(),
-      button(div, "right").css("float", "right").promise(),
-    ])
-    this.content.empty()
-    this.setPrompt(
-      `The correct choice was ${choice === "left" ? "right" : "left"}.`
-    )
-
-    // IMPORTANT: use this.sleep or this.registerPromise(sleep()) to make sure
-    // the stage is correctly interrupted if a new stage is loaded (by clicking the arrows).
-    await this.sleep(1000)
-
-    this.setPrompt(`
-      You might also have to drag sliders.
-    `)
-    // You don't need to register promises for interactions that are tied to html elements
-    // because the promise can't ever be resolved in that case.
-    await slider(this.prompt).promise("change")
-
-    this.setPrompt(`
-      You might have to answer questions too. Is that okay?
-    `)
-    
-    // you can use the class constructor or convenience function as you prefer
-    let radio = new RadioButtons({
-      choices: ["yes", "no"],
-      name: "instruct.okay", // this will be the event name, for easier data processing
-    }).appendTo(this.prompt)
-
-    // wait for user input before continuing
-    // promise() always returns a Promise (something you can await)
-    let click = await radio.promise()
-    // inputSelector() is a jquery selector so you can use any jquery magic you want here
-    radio.inputSelector().prop("disabled", true)
-    // All interactions with the components defined in inputs.js
-    // will be automatically logged (saved to database)
-
-    if (click == "yes") {
-      this.appendPrompt("Glad to hear it!")
-    } else {
-      this.appendPrompt("Well at least you're willing to do it anyway.")
-    }
+    await button(this.prompt, "Click me").promise()
   }
 
+  async stage_buttonarray() {
+    let choice = await button_array(this.prompt, 
+      "You can make multiple buttons at once.", 
+      ["left", "right"]
+    ).promise()
+    console.log('CHOICE', choice)
+    
+    this.prompt.html(
+      `You really should have clicked ${choice === "left" ? "right" : "left"}.`
+    )
+    await this.continue("I'm sorry")  // convenience method to make a button
+    this.runNext()
+  }
+
+  async stage_slider() {
+    this.setPrompt(`
+      We've got sliders.
+    `)
+    await slider(this.prompt, "how slider?", {
+      leftLabel: "not at all slider",
+      rightLabel: "extremely slider",
+    }).promise("change")
+  }
+    
+  async stage_radio() {
+    const radio = radio_buttons(this.prompt, 
+      "Radio buttons for days!", 
+      ["so", "many", "buttons"]
+    )
+    
+    await radio.promise()
+    // inputSelector() is a jquery selector so you can use any jquery magic you want here
+    radio.inputSelector().prop("disabled", true)
+
+    await radio_buttons(this.prompt, 
+      "this is a Likert scale", 
+      ["strongly disagree", "disagree", "neutral", "agree", "strongly agree"],
+      {name: 'likert'}
+    ).promise()
+
+    await this.continue()
+  }
+
+  async stage_logging() {
+    this.setPrompt("By the way, we've been watching you.")
+    // await sleep(2000)
+    await this.continue("uhh...")
+
+    // FYI: it's much easier to do this the "regular" way with Date.now()
+    let e1 = DATA.events.findLast(e => {
+      return e.event.endsWith('display')
+    })
+    let e2 = DATA.events.findLast(e => {
+      return e.event.endsWith('click')
+    })
+    let rt = e2.timestamp - e1.timestamp
+
+    this.setPrompt(`
+      We've been logging _everything you do._ You clicked that last
+      button ${rt}ms after it appeared.
+    `)
+    await this.continue("i see")
+    this.setPrompt(`
+      You can see the data, right there in the developer console.
+      It will also be saved in data/events.csv. Here it is:
+    `)
+    this.content.html(
+      `<pre>${JSON.stringify(DATA.events, null, 2)}</pre>`
+    )
+    await this.continue("creepy")
+  }
+    
   async stage_alerts() {
+    this.preventAutoContinue()
     this.setPrompt("Sometimes there will be fun alerts!")
     let div = $("<div>")
       .css({
@@ -114,9 +136,10 @@ class ExampleInstructions extends Instructions {
       console.log(type, className)
       button(div, type, {persistent: true, className}).on("click", () => ALERTS[type]())
     }
+    
   }
 
-  async stage_introduce_task() {
+  async stage_task() {
     this.setPrompt(`
       You can embed the task into the instructions. This is usually a good way
       to introduce the task to participants.
@@ -148,13 +171,13 @@ class ExampleInstructions extends Instructions {
     // You can also get a promise that resolves when an event occurs 
     // with this.eventPromise() or EVENTS.promise()
     this.onEvent("task.hit", () => {
-      this.prompt.append("Sweet! ")
+      this.prompt.append(" Nice! ")
     })
     this.onEvent("task.miss", () => {
-      this.prompt.append("So close! ")
+      this.prompt.append(" So close! ")
     })
     this.onEvent("task.timeout", () => {
-      this.prompt.append("Too slow! ")
+      this.prompt.append(" Too slow! ")
     })
     let task = new ExampleTask({
       nRound: 8,
@@ -169,8 +192,7 @@ class ExampleInstructions extends Instructions {
 
   async stage_quiz() {
     this.setPrompt(`
-      You can also embed quizzes into the instructions. This ensures that the
-      participants have read the instructions carefully.
+      You can also embed quizzes into the instructions.
     `)
     // we assign the quiz to a property so that the state is preserved 
     // when the user navigates between stages (to check for answers)

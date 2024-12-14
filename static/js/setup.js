@@ -104,6 +104,10 @@ const DATA = {
 
   // Records an event and emits it to custom listeners
   recordEvent(event, data={}) {
+    if (typeof event != "string") {
+      console.error("recordEvent: event must be a string", event)
+      return
+    }
     if (typeof data != "object") {
       data = {data}
     }
@@ -287,7 +291,11 @@ async function showCompletionScreen() {
 };
 
 function handleError(e) {
-  let msg = e.stack?.length > 10 ? e.stack : `${e}`;
+  window.ERR = e
+  let msg = 
+    e.stack?.length > 10 ? e.stack : 
+    e.message?.length > 10 ? e.message : 
+    `${e}`;
   const workerIdMessage = typeof workerId !== "undefined" && workerId !== null ? workerId : 'N/A';
   DATA.recordEvent('experiment.error', {msg})
   const message = `Participant Id: ${workerIdMessage}\n${msg}`;

@@ -6,6 +6,7 @@ function deferredPromise(promise) {
   })
   deferred.resolve = resolve
   deferred.reject = reject
+  deferred.status = 'pending'
 
   if (promise) {
     if (typeof promise == "function") {
@@ -15,11 +16,34 @@ function deferredPromise(promise) {
     }
     promise.then(deferred.resolve, deferred.reject)
   }
+  deferred.then(() => deferred.status = 'resolved')
+  deferred.catch(() => deferred.status = 'rejected')
   return deferred
 }
 
 function clickPromise(el) {
   return deferredPromise((resolve) => el.on("click", resolve))
+}
+
+function isInDOMPromise(el) {
+  return new Promise(resolve => {
+    if (el.closest(document).length > 0) {
+      resolve()
+      return
+    }
+
+    const observer = new MutationObserver(() => {
+      if (el.closest(document).length > 0) {
+        observer.disconnect()
+        resolve()
+      }
+    })
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    })
+  })
 }
 
 function sleep(ms, name = "sleep") {

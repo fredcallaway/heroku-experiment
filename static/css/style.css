@@ -1,6 +1,10 @@
 
 /* template basics */
 
+label {
+  font-weight: 400;
+}
+
 #welcome-message {
    max-width: 95%; /* this is mainly an IE 10-11 fix */
    margin: auto;

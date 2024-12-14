@@ -15,6 +15,7 @@ class Instructions extends Component {
       contentHeight: null,
       helpText: DEFAULT_INSTRUCT_HELP,
       debugDivs: false,
+      autoNext: false,
       ...options
     })
 
@@ -146,6 +147,7 @@ class Instructions extends Component {
    * @param {number} stage - stage number (1-indexed)
    */
   async runStage(stage) {
+    this._preventAutoContinue = false
     if (stage === undefined) {
       stage = this.stage
     } else if (isNaN(stage) || stage < 1 || stage > this.stages.length) {
@@ -190,10 +192,17 @@ class Instructions extends Component {
     this.runStage(this.stage - 1)
   }
 
+  preventAutoContinue() {
+    this._preventAutoContinue = true
+  }
   enableNext() {
-    this.btnNext.addClass("btn-pulse")
     this.maxStage = this.stage + 1
-    this.btnNext.prop("disabled", false)
+    if (this.autoNext && !this._preventAutoContinue) {
+      this.runNext()
+    } else {
+      this.btnNext.prop("disabled", false)
+      this.btnNext.addClass("btn-pulse")
+    }
   }
 
 }
