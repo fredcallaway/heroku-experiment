@@ -4,6 +4,11 @@ DEPENDENCIES
   (jquery)
   <link href="https://unpkg.com/survey-jquery/defaultV2.min.css" type="text/css" rel="stylesheet">
   <script src="https://unpkg.com/survey-jquery/survey.jquery.min.js"></script>
+
+TIPS:
+
+  Use https://surveyjs.io/create-free-survey to create the survey JSON using a GUI
+
 */
 
 const EXAMPLE_SURVEY = {
@@ -73,6 +78,19 @@ class SurveyComponent extends Component {
   }
   async _run() {
     this.survey.render('_survey_target');
+    let emptyWarning = $(".sd-body--empty")
+    if (emptyWarning.length > 0) {
+      emptyWarning.append(`<div class='alert alert-info' style='margin: 40px; user-select: text'>
+        <b>Tip:</b>
+
+        You probably passed an incorrect configuration to the <code>SurveyComponent</code>.
+        <p>
+        Try using https://surveyjs.io/create-free-survey to create the survey JSON using a GUI.
+
+      `)
+    }
+
+
     const data = deferredPromise()
     this.survey.onComplete.add((sender) => data.resolve(sender.data));
     let results = await data
